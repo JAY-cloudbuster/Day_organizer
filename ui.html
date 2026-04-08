@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Daily Canvas - Planner Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#cbe7f5",
+                        "surface-container-high": "#e3e9ec",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#dbe4e7",
+                        "secondary": "#49636f",
+                        "background": "#f8f9fa",
+                        "on-secondary-container": "#3c5561",
+                        "on-error": "#fff7f7",
+                        "inverse-primary": "#dff1fb",
+                        "on-tertiary": "#f8f8ff",
+                        "tertiary-fixed": "#d1ddfa",
+                        "outline": "#737c7f",
+                        "on-secondary": "#f2faff",
+                        "error": "#9e3f4e",
+                        "on-tertiary-fixed": "#303c53",
+                        "on-background": "#2b3437",
+                        "error-container": "#ff8b9a",
+                        "on-primary-fixed": "#324249",
+                        "primary-fixed-dim": "#c6d7e1",
+                        "surface-tint": "#506169",
+                        "primary": "#506169",
+                        "on-secondary-fixed-variant": "#455f6b",
+                        "secondary-fixed-dim": "#bdd9e6",
+                        "inverse-surface": "#0c0f10",
+                        "secondary-container": "#cbe7f5",
+                        "surface-container-low": "#f1f4f6",
+                        "on-surface-variant": "#586064",
+                        "error-dim": "#4f0116",
+                        "on-primary-container": "#44545c",
+                        "on-error-container": "#782232",
+                        "on-tertiary-container": "#434e66",
+                        "primary-container": "#d4e5ef",
+                        "on-tertiary-fixed-variant": "#4c5870",
+                        "surface-container": "#eaeff1",
+                        "tertiary-container": "#d1ddfa",
+                        "on-surface": "#2b3437",
+                        "primary-fixed": "#d4e5ef",
+                        "surface-dim": "#d1dce0",
+                        "on-primary-fixed-variant": "#4e5e66",
+                        "surface-bright": "#f8f9fa",
+                        "tertiary": "#535f78",
+                        "secondary-dim": "#3d5762",
+                        "tertiary-fixed-dim": "#c3cfeb",
+                        "on-primary": "#f0f9ff",
+                        "primary-dim": "#45555d",
+                        "outline-variant": "#abb3b7",
+                        "tertiary-dim": "#47536b",
+                        "surface": "#f8f9fa",
+                        "surface-variant": "#dbe4e7",
+                        "on-secondary-fixed": "#29434e",
+                        "inverse-on-surface": "#9b9d9e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .canvas-grid {
+            background-color: #f8f9fa;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .dark .canvas-grid {
+            background-color: #2b3437;
+            background-image: radial-gradient(#47536b 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container overflow-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-3 backdrop-blur-xl bg-opacity-80 bg-[#f8f9fa] dark:bg-[#2b3437] transition-colors duration-200">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<span class="text-xl font-bold text-[#506169] dark:text-[#f1f4f6]">Daily Canvas</span>
+<span class="mx-4 h-4 w-px bg-outline-variant opacity-20"></span>
+<h1 class="Inter font-bold headline-sm text-[1.5rem] tracking-tight text-[#506169] dark:text-[#cbe7f5] focus:outline-none focus:ring-b-2 border-[#506169]" contenteditable="true">Untitled Plan</h1>
+</div>
+<div class="hidden md:flex items-center gap-4">
+<button class="text-[#586064] dark:text-[#abb3b7] hover:bg-[#e3e9ec] dark:hover:bg-[#45555d] transition-colors px-3 py-1 rounded-xl text-sm font-medium">Files</button>
+<button class="text-[#586064] dark:text-[#abb3b7] hover:bg-[#e3e9ec] dark:hover:bg-[#45555d] transition-colors px-3 py-1 rounded-xl text-sm font-medium">Insert</button>
+<button class="text-[#586064] dark:text-[#abb3b7] hover:bg-[#e3e9ec] dark:hover:bg-[#45555d] transition-colors px-3 py-1 rounded-xl text-sm font-medium">View</button>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="material-symbols-outlined p-2 text-[#586064] dark:text-[#abb3b7] hover:bg-[#e3e9ec] dark:hover:bg-[#45555d] transition-colors rounded-full" data-icon="dark_mode">dark_mode</button>
+<button class="material-symbols-outlined p-2 text-[#586064] dark:text-[#abb3b7] hover:bg-[#e3e9ec] dark:hover:bg-[#45555d] transition-colors rounded-full" data-icon="history">history</button>
+<button class="material-symbols-outlined p-2 text-[#586064] dark:text-[#abb3b7] hover:bg-[#e3e9ec] dark:hover:bg-[#45555d] transition-colors rounded-full" data-icon="share">share</button>
+<div class="ml-4 h-8 w-8 rounded-full overflow-hidden border border-outline-variant bg-surface-container">
+<img alt="User profile" data-alt="Close up portrait of a professional woman with a clean background, soft studio lighting, professional headshot style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBM3UH6v76vwAaREvfIKYZG2W1f02g67Ru5KRbck5BEOWREjqJBid2rCLX_q94I_QkPdxqO8Xpp7VGpXqBwiONjDqQV5Yxm34zVN-zOjHvOVoJGyuUdSn9e92KjRUb-HRJdmGZtUKgYx8B4LKEycAlvlFhHfnpQgzPS-TmM7OKJ3BtgWED2yXngMObE7Sg0ERY3EfkZEVKGAldpvh_9WWNojH3Aofb40kmmmmHjHNVFhI2VFGfA84jK6iuhxCryp99RwaZ5aSgoMcw"/>
+</div>
+</div>
+</nav>
+<!-- SideNavBar (Left Tools) -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-[#f1f4f6] dark:bg-[#1e2527] pt-20 px-4 flex flex-col z-40 transition-colors duration-200">
+<div class="mb-8 px-2">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="dashboard">dashboard</span>
+</div>
+<div>
+<div class="text-lg font-semibold text-[#506169] dark:text-[#f8f9fa]">Planner Studio</div>
+<div class="Inter label-sm text-[0.6875rem] font-medium text-[#586064] dark:text-[#abb3b7]">v1.2.0</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-1 mb-10">
+<div class="px-2 py-2 mb-2 text-[0.65rem] uppercase tracking-wider font-bold text-on-surface-variant opacity-60">Components</div>
+<div class="group cursor-grab active:scale-95 transition-transform bg-surface-container-lowest dark:bg-[#2b3437] p-4 rounded-xl mb-3 shadow-sm border border-outline-variant/10">
+<div class="w-full h-12 bg-primary-container/30 rounded-lg border-2 border-dashed border-primary/20 flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-primary/40" data-icon="rectangle">rectangle</span>
+</div>
+<div class="text-sm font-semibold text-primary">Rectangle</div>
+<div class="text-[0.65rem] text-on-surface-variant">General Section Container</div>
+</div>
+<div class="group cursor-grab active:scale-95 transition-transform bg-surface-container-lowest dark:bg-[#2b3437] p-4 rounded-xl mb-3 shadow-sm border border-outline-variant/10">
+<div class="w-full h-12 flex items-center justify-center mb-3">
+<div class="w-12 h-12 rounded-full bg-secondary-container/30 border-2 border-dashed border-secondary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary/40" data-icon="circle">circle</span>
+</div>
+</div>
+<div class="text-sm font-semibold text-secondary">Circle</div>
+<div class="text-[0.65rem] text-on-surface-variant">Priority &amp; Focal Points</div>
+</div>
+<div class="group cursor-grab active:scale-95 transition-transform bg-surface-container-lowest dark:bg-[#2b3437] p-4 rounded-xl mb-6 shadow-sm border border-outline-variant/10">
+<div class="w-full h-12 bg-tertiary-container/30 rounded-lg border-2 border-dashed border-tertiary/20 flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-tertiary/40" data-icon="sticky_note_2">sticky_note_2</span>
+</div>
+<div class="text-sm font-semibold text-tertiary">Task Card</div>
+<div class="text-[0.65rem] text-on-surface-variant">Structured Task Entry</div>
+</div>
+</div>
+<div class="mt-auto pb-8 space-y-1">
+<button class="flex items-center gap-3 w-full p-3 rounded-xl transition-colors hover:bg-[#e3e9ec] dark:hover:bg-[#2b3437] text-[#586064] dark:text-[#abb3b7]">
+<span class="material-symbols-outlined" data-icon="category">category</span>
+<span class="Inter label-sm text-[0.6875rem] font-medium">Library</span>
+</button>
+<button class="flex items-center gap-3 w-full p-3 rounded-xl transition-colors bg-[#ffffff] dark:bg-[#2b3437] text-[#506169] dark:text-[#f8f9fa] shadow-sm">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span class="Inter label-sm text-[0.6875rem] font-medium">Assets</span>
+</button>
+<button class="flex items-center gap-3 w-full p-3 rounded-xl transition-colors hover:bg-[#e3e9ec] dark:hover:bg-[#2b3437] text-[#586064] dark:text-[#abb3b7]">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="Inter label-sm text-[0.6875rem] font-medium">Settings</span>
+</button>
+</div>
+</aside>
+<!-- Main Canvas Area -->
+<main class="ml-64 mt-16 h-[calc(100vh-4rem)] relative canvas-grid overflow-auto transition-colors duration-200">
+<!-- Example Placed Items -->
+<div class="absolute top-20 left-20">
+<!-- Rectangle Shape -->
+<div class="w-80 h-48 bg-surface-container-lowest shadow-xl rounded-xl p-6 border border-outline-variant/5 group cursor-move">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-bold text-primary text-lg">To-Do</h3>
+<span class="material-symbols-outlined text-outline-variant text-sm" data-icon="drag_indicator">drag_indicator</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded border border-outline-variant"></div>
+<span class="text-sm text-on-surface-variant">Review design feedback</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-4 h-4 rounded border border-outline-variant"></div>
+<span class="text-sm text-on-surface-variant">Sync with developers</span>
+</div>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-primary w-6 h-6 rounded-full flex items-center justify-center text-white scale-0 group-hover:scale-100 transition-transform">
+<span class="material-symbols-outlined text-[14px]" data-icon="add">add</span>
+</div>
+</div>
+</div>
+<div class="absolute top-40 left-[450px]">
+<!-- Circle Shape -->
+<div class="w-32 h-32 rounded-full bg-secondary-container/40 border-2 border-secondary/30 flex flex-col items-center justify-center shadow-lg group cursor-move">
+<span class="material-symbols-outlined text-secondary mb-1" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-xs font-bold text-on-secondary-container uppercase tracking-widest">Priority</span>
+<div class="absolute inset-0 rounded-full border-4 border-secondary/10 group-hover:scale-110 transition-transform duration-500"></div>
+</div>
+</div>
+<div class="absolute top-80 left-[180px]">
+<!-- Project Card -->
+<div class="w-96 bg-surface-container-lowest/80 backdrop-blur-md shadow-2xl rounded-xl overflow-hidden border border-outline-variant/10 cursor-move">
+<div class="h-2 bg-tertiary"></div>
+<div class="p-6">
+<div class="flex justify-between items-center mb-4">
+<span class="px-2 py-1 bg-tertiary-container text-on-tertiary-container rounded-full text-[10px] font-extrabold uppercase tracking-tighter">In Progress</span>
+<span class="material-symbols-outlined text-outline-variant" data-icon="more_horiz">more_horiz</span>
+</div>
+<h2 class="text-xl font-bold text-on-surface mb-2">Project Alpha</h2>
+<p class="text-sm text-on-surface-variant mb-6 leading-relaxed">Redesigning the onboarding flow to incorporate the new design system tokens.</p>
+<div class="flex items-center -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-container overflow-hidden">
+<img alt="Team member" data-alt="Portrait of a creative professional man in a modern office, soft natural lighting, minimal background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXscwqin8hZ0eh5aCHiMe0atES0bFEwNO9lYXwGtWb95sRvJAgtU8OnIfhe5milvqbLyUygA-t0d6bLyMGOGV-vsSpCNThUCkMBYS0sIS6JLfzg_hZayVORMibKXz5TDhcwCaoALEvIdoU2pvGgNtL7pwaK7JWfsVwEkClegiXBUdK2uzpOEArfxVa4FSEufUYWoHS7evVcEy2pOGYHbO7xoBOCIXZWLfUvxbYgYyjpbyXvGw02Twm5fk4KZNNQ9mnwpsX_Zza_KA"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-container overflow-hidden">
+<img alt="Team member" data-alt="Portrait of a smiling creative professional woman, brightly lit, vibrant and professional energy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB79NNglMMV2myTr0RMnWz4ObOmPXwkvjsqTw3vDQpX8M6GyJiNv4xufnOE1BdTeb01HzZkYlFbRWlm2GPuiVF74r-yFDMiZsX9apMLfZ3Dekkr1tFu9ZDZpLIeXWS1LUpaX2C5mIeLoIiaYx24h2cP9OpdrUw0ID_VlQV_glQokqKRo6oLGuhbzW94rIrGFJBuWamxje7mmqpqrlhfsfIe9aSk-aC5GL3faxE5hAzT8WgvAifzRDa3Ygtc5qgra3QBoHkVzQfu8Uw"/>
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-on-surface-variant">
+                            +2
+                        </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Tool (Glassmorphism) -->
+<div class="fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2 p-2 bg-surface/80 backdrop-blur-2xl rounded-full shadow-[0_20px_50px_rgba(43,52,55,0.12)] border border-outline-variant/10 z-50">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-on-primary hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-icon="mouse">mouse</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="pan_tool">pan_tool</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="add_comment">add_comment</span>
+</button>
+<div class="w-px h-6 bg-outline-variant/20 mx-1"></div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="zoom_in">zoom_in</span>
+</button>
+<div class="px-2 text-xs font-bold text-on-surface-variant">100%</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined" data-icon="zoom_out">zoom_out</span>
+</button>
+</div>
+<!-- Auto-saving Indicator -->
+<div class="fixed bottom-6 right-6 flex items-center gap-2 px-3 py-1.5 bg-surface-container-lowest/90 border border-outline-variant/10 rounded-full shadow-sm z-50">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] font-semibold text-on-surface-variant uppercase tracking-widest">Auto-saving...</span>
+</div>
+</main>
+</body></html>
