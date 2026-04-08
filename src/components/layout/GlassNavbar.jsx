@@ -1,13 +1,43 @@
 import React, { useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
-import { Moon, Sun, History, Share2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Moon, Sun, History, Share2, Loader2, Download } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AccountModal } from './AccountModal';
+import { toPng } from 'html-to-image';
 
 export const GlassNavbar = () => {
-  const { theme, toggleTheme } = useCanvasStore();
+  const { id } = useParams();
+  const { theme, toggleTheme, currentProjectTitle } = useCanvasStore();
   const navigate = useNavigate();
   const [showAccount, setShowAccount] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleShare = async () => {
+    setIsExporting(true);
+    try {
+      const element = document.querySelector('.canvas-viewport');
+      if (!element) throw new Error("Viewport not found");
+      
+      const dataUrl = await toPng(element, { 
+        backgroundColor: theme === 'dark' ? '#09090b' : '#ffffff',
+        pixelRatio: 2,
+        filter: (node) => !node.classList?.contains('glass-navbar') // optional filter out UI elements if tagged
+      });
+      
+      const link = document.createElement('a');
+      link.download = `canvas-${currentProjectTitle || id}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch(err) {
+      console.error(err);
+      alert('Failed to generate Canvas export.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const visits = JSON.parse(localStorage.getItem(`canvas_visits_${id}`) || '[]');
 
   return (
     <nav className="glass-panel fixed top-0 left-0 right-0 h-16 m-4 mt-2 px-6 flex items-center justify-between z-50">
@@ -23,15 +53,47 @@ export const GlassNavbar = () => {
         <div className="w-px h-6 bg-gray-300 opacity-30" />
         
         <input 
-          defaultValue="Untitled Plan"
-          className="bg-transparent border-none outline-none font-bold text-xl w-48 focus:border-b-2"
-          style={{ color: 'var(--text-main)', borderBottomColor: 'var(--accent-primary)' }}
+          value={currentProjectTitle || "Loading Plan..."}
+          readOnly
+          className="bg-transparent border-none outline-none font-bold text-xl w-48 text-ellipsis cursor-default"
+          style={{ color: 'var(--text-main)' }}
         />
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4">
-        <NavButton icon={<History size={18} />} label="History" />
-        <NavButton icon={<Share2 size={18} />} label="Share" />
+      <div className="flex items-center gap-2 sm:gap-4 relative">
+        <NavButton 
+          icon={<History size={18} />} 
+          label="History" 
+          onClick={() => setShowHistory(!showHistory)} 
+        />
+        
+        {/* History Dropdown Panel */}
+        {showHistory && (
+          <div className="absolute top-12 right-1/2 translate-x-1/4 w-72 max-h-96 overflow-y-auto glass-panel p-4 rounded-xl shadow-2xl z-50 border" style={{ borderColor: 'var(--ghost-border)', backgroundColor: 'var(--surface-high)' }}>
+            <h3 className="font-bold mb-3 border-b pb-2 text-sm uppercase tracking-widest" style={{ color: 'var(--text-main)', borderColor: 'var(--ghost-border)' }}>Access Logs</h3>
+            {visits.length === 0 ? (
+              <div className="text-sm italic" style={{ color: 'var(--text-muted)' }}>No previous visits logged.</div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {visits.map((isoString, idx) => {
+                  const d = new Date(isoString);
+                  return (
+                    <div key={idx} className="flex justify-between items-center text-xs p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5" style={{ color: 'var(--text-main)' }}>
+                      <span className="font-semibold">{d.toLocaleDateString()}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>{d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        <NavButton 
+          icon={isExporting ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />} 
+          label={isExporting ? "Exporting..." : "Share"} 
+          onClick={handleShare}
+        />
         <div className="w-px h-6 bg-gray-300 opacity-30 mx-1" />
         <NavButton 
           icon={theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />} 

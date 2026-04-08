@@ -3,6 +3,7 @@ import { useCanvasStore } from '../../store/useCanvasStore';
 import { X, Lock, Trash2, Mail, Activity, LogOut, Loader2 } from 'lucide-react';
 
 export const AccountModal = ({ onClose }) => {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const { authToken, logout } = useCanvasStore();
   const [profile, setProfile] = useState(null);
   
@@ -18,7 +19,7 @@ export const AccountModal = ({ onClose }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/auth/me', {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
           headers: { 'Authorization': `Bearer ${authToken}` }
         });
         const data = await res.json();
@@ -35,7 +36,7 @@ export const AccountModal = ({ onClose }) => {
     if(loadingPass) return;
     setLoadingPass(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/update-password', {
+      const res = await fetch(`${API_URL}/api/auth/update-password`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
         body: JSON.stringify({ currentPassword: oldPass, newPassword: newPass })
@@ -58,7 +59,7 @@ export const AccountModal = ({ onClose }) => {
 
     setLoadingDel(true);
     try {
-      const res = await fetch('http://localhost:5000/api/auth/delete', {
+      const res = await fetch(`${API_URL}/api/auth/delete`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${authToken}` }
       });

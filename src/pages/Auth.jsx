@@ -4,6 +4,7 @@ import { useCanvasStore } from '../store/useCanvasStore';
 import { Loader2, Moon, Sun } from 'lucide-react';
 
 export const Auth = () => {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const navigate = useNavigate();
   const { theme, toggleTheme, setAuthToken } = useCanvasStore();
   const [isLogin, setIsLogin] = useState(true);
@@ -25,7 +26,7 @@ export const Auth = () => {
     
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

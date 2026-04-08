@@ -16,7 +16,14 @@ export const Workspace = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (id) loadProject(id);
+    if (id) {
+      loadProject(id);
+      // Track rigorous visit timestamps for History dropdown
+      const key = `canvas_visits_${id}`;
+      const visits = JSON.parse(localStorage.getItem(key) || '[]');
+      visits.unshift(new Date().toISOString());
+      localStorage.setItem(key, JSON.stringify(visits.slice(0, 30)));
+    }
   }, [id, loadProject]);
 
   return (

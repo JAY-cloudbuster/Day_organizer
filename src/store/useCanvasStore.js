@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export const useCanvasStore = create((set, get) => ({
   nodes: [],
   edges: [], // For arrow connections: { id, from: nodeId, to: nodeId }
   pan: { x: 0, y: 0 },
   zoom: 1,
   saveStatus: 'saved',
-  theme: 'light',
+  theme: localStorage.getItem('app_theme') || 'dark',
   activeTool: 'select', // 'select', 'pan', 'comment', 'connect'
   connectingFrom: null, // Holds the node id when a connection line is started
 
@@ -27,7 +29,11 @@ export const useCanvasStore = create((set, get) => ({
     set({ authToken: null, nodes: [] });
   },
 
-  toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
+  toggleTheme: () => set((state) => {
+    const newTheme = state.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('app_theme', newTheme);
+    return { theme: newTheme };
+  }),
   setActiveTool: (tool) => set({ activeTool: tool, connectingFrom: null }),
   setConnectingFrom: (id) => set({ connectingFrom: id }),
 
@@ -103,7 +109,7 @@ export const useCanvasStore = create((set, get) => ({
     const token = get().authToken;
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:5000/api/projects', { headers: { 'Authorization': `Bearer ${token}` }});
+      const res = await fetch(`${API_URL}/api/projects`, { headers: { 'Authorization': `Bearer ${token}` }});
       const data = await res.json();
       if (data.projects) set({ projectsList: data.projects });
     } catch(e) { console.error("Failed loading projects list", e); }
@@ -113,7 +119,7 @@ export const useCanvasStore = create((set, get) => ({
     const token = get().authToken;
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:5000/api/projects', {
+      const res = await fetch(`${API_URL}/api/projects`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ title: title || 'New Canvas' })
@@ -128,7 +134,7 @@ export const useCanvasStore = create((set, get) => ({
     const token = get().authToken;
     if (!token) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/projects/${id}`, { headers: { 'Authorization': `Bearer ${token}` }});
+      const res = await fetch(`${API_URL}/api/projects/${id}`, { headers: { 'Authorization': `Bearer ${token}` }});
       const data = await res.json();
       if (data.project) {
         const parsed = JSON.parse(data.project.canvas_state);
@@ -148,7 +154,7 @@ export const useCanvasStore = create((set, get) => ({
     const token = get().authToken;
     if (!token) return;
     try {
-      await fetch(`http://localhost:5000/api/projects/${id}`, {
+      await fetch(`${API_URL}/api/projects/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -173,7 +179,7 @@ export const useCanvasStore = create((set, get) => ({
           pan: currentState.pan, 
           zoom: currentState.zoom 
         });
-        await fetch(`http://localhost:5000/api/projects/${currentState.currentProjectId}`, {
+        await fetch(`${API_URL}/api/projects/${currentState.currentProjectId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentState.authToken}` },
           body: JSON.stringify({ stateData: payload })
