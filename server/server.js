@@ -47,6 +47,15 @@ db.serialize(() => {
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(id)
   )`);
+
+  db.run(`CREATE TABLE IF NOT EXISTS schedules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    schedule_state TEXT NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+  )`);
 });
 
 // AUTHENTICATION MIDDLEWARE
@@ -182,6 +191,77 @@ app.put('/api/projects/:id', authenticateToken, (req, res) => {
       if (err) return res.status(500).json({ error: "Update failed" });
       res.json({ message: "Saved perfectly!" });
   });
+});
+
+// ================= SCHEDULE ROUTES ================= //
+
+// CREATE SCHEDULE
+app.post('/api/schedules', authenticateToken, (req, res) => {
+  const { title, stateData } = req.body;
+  const state = stateData || JSON.stringify({ blocks: [] });
+  db.run("INSERT INTO schedules (user_id, title, schedule_state) VALUES (?, ?, ?)",
+    [req.user.id, title || 'My Schedule', state],
+    function(err) {
+      if (err) return res.status(500).json({ error: "Schedule creation failed" });
+      res.json({ id: this.lastID, title: title || 'My Schedule' });
+    }
+  );
+});
+
+// GET ALL SCHEDULES FOR USER
+app.get('/api/schedules', authenticateToken, (req, res) => {
+  db.all("SELECT id, title, updated_at FROM schedules WHERE user_id = ? ORDER BY updated_at DESC",
+    [req.user.id],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: "Database error" });
+      res.json({ schedules: rows });
+    }
+  );
+});
+
+// GET SINGLE SCHEDULE
+app.get('/api/schedules/:id', authenticateToken, (req, res) => {
+  db.get("SELECT schedule_state, title FROM schedules WHERE id = ? AND user_id = ?",
+    [req.params.id, req.user.id],
+    (err, row) => {
+      if (err) return res.status(500).json({ error: "Database error" });
+      if (!row) return res.status(404).json({ error: "Schedule not found" });
+      res.json({ schedule: row });
+    }
+  );
+});
+
+// UPDATE SCHEDULE STATE
+app.put('/api/schedules/:id', authenticateToken, (req, res) => {
+  const { stateData, title } = req.body;
+  if (title) {
+    db.run("UPDATE schedules SET title = ?, schedule_state = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?",
+      [title, stateData, req.params.id, req.user.id],
+      function(err) {
+        if (err) return res.status(500).json({ error: "Update failed" });
+        res.json({ message: "Schedule saved!" });
+      }
+    );
+  } else {
+    db.run("UPDATE schedules SET schedule_state = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?",
+      [stateData, req.params.id, req.user.id],
+      function(err) {
+        if (err) return res.status(500).json({ error: "Update failed" });
+        res.json({ message: "Schedule saved!" });
+      }
+    );
+  }
+});
+
+// DELETE SCHEDULE
+app.delete('/api/schedules/:id', authenticateToken, (req, res) => {
+  db.run("DELETE FROM schedules WHERE id = ? AND user_id = ?",
+    [req.params.id, req.user.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: "Failed to delete schedule" });
+      res.json({ message: "Schedule deleted." });
+    }
+  );
 });
 
 app.listen(PORT, () => console.log(`Cyber-secure backend running perfectly on http://localhost:${PORT}`));
