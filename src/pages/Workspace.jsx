@@ -7,6 +7,9 @@ import { FloatingToolbar } from '../components/layout/FloatingToolbar';
 import { ExecutionToolbar } from '../components/layout/ExecutionToolbar';
 import { useCanvasStore } from '../store/useCanvasStore';
 
+const VIDEO_URL =
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4';
+
 export const Workspace = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -14,13 +17,12 @@ export const Workspace = () => {
   const [isIsolated, setIsIsolated] = useState(false);
 
   useEffect(() => {
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
+    document.body.setAttribute('data-theme', 'dark');
+  }, []);
 
   useEffect(() => {
     if (id) {
       loadProject(id);
-      // Track rigorous visit timestamps for History dropdown
       const key = `canvas_visits_${id}`;
       const visits = JSON.parse(localStorage.getItem(key) || '[]');
       visits.unshift(new Date().toISOString());
@@ -29,47 +31,58 @@ export const Workspace = () => {
   }, [id, loadProject]);
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-transparent">
-      {!isIsolated && <GlassNavbar />}
-      {!isIsolated && <Sidebar />}
-      
-      <CanvasBoard />
-      
-      {!isIsolated && <FloatingToolbar />}
-      
-      {/* Execution Engine Toolbar */}
-      {!isIsolated && <ExecutionToolbar />}
+    <div className="workspace-cinematic">
+      {/* ── Background Video (dimmed for canvas readability) ── */}
+      <video
+        className="workspace-cinematic__video"
+        src={VIDEO_URL}
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+      <div className="workspace-cinematic__overlay" />
 
-      {/* Isolate Zen Mode Toggle */}
-      <button 
-        onClick={() => setIsIsolated(!isIsolated)}
-        className="fixed z-[60] glass-pill px-5 py-2.5 font-black text-xs tracking-widest uppercase hover:scale-105 transition-all shadow-xl border flex items-center justify-center gap-2"
-        style={{ 
-          top: isIsolated ? '1.5rem' : '5.5rem', 
-          right: '1.5rem', 
-          color: 'var(--text-main)', 
-          backgroundColor: 'var(--surface-high)',
-          borderColor: 'var(--accent-primary)',
-          color: 'var(--accent-primary)'
-        }}
-      >
-        {isIsolated ? "<- Isolate!" : "Isolate! ->"}
-      </button>
+      {/* ── Canvas Layer ── */}
+      <div className="workspace-cinematic__content">
+        {!isIsolated && <GlassNavbar />}
+        {!isIsolated && <Sidebar />}
 
-      {!isIsolated && (
-        <div className="glass-pill fixed bottom-6 right-6 px-4 py-2 flex items-center gap-2 z-50 cursor-pointer hover:scale-105 transition-transform" onClick={() => navigate('/dashboard')}>
-          <div 
-            className="w-2 h-2 rounded-full" 
-            style={{ 
-              backgroundColor: saveStatus === 'saving' ? '#eab308' : 'var(--accent-primary)',
-              animation: saveStatus === 'saving' ? 'pulse 1s infinite' : 'none'
-            }} 
-          />
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>
-            {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
-          </span>
-        </div>
-      )}
+        <CanvasBoard />
+
+        {!isIsolated && <FloatingToolbar />}
+        {!isIsolated && <ExecutionToolbar />}
+
+        {/* Zen Mode Toggle */}
+        <button
+          onClick={() => setIsIsolated(!isIsolated)}
+          className="workspace-cinematic__zen liquid-glass"
+          style={{
+            top: isIsolated ? '1.5rem' : '5.5rem',
+          }}
+        >
+          {isIsolated ? '← Exit Zen' : 'Zen Mode →'}
+        </button>
+
+        {/* Save Status */}
+        {!isIsolated && (
+          <div
+            className="workspace-cinematic__save liquid-glass"
+            onClick={() => navigate('/dashboard')}
+          >
+            <div
+              className="workspace-cinematic__save-dot"
+              style={{
+                backgroundColor: saveStatus === 'saving' ? '#eab308' : '#22c55e',
+                animation: saveStatus === 'saving' ? 'pulse 1s infinite' : 'none',
+              }}
+            />
+            <span className="workspace-cinematic__save-text">
+              {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
