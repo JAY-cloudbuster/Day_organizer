@@ -6,10 +6,11 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
 const app = express();
-const PORT = 5000;
-const SECRET_KEY = "SUPER_SECURE_JWT_SECRET_DAY_ORGANISER";
+const PORT = process.env.PORT || 5000;
+const SECRET_KEY = process.env.JWT_SECRET || "SUPER_SECURE_JWT_SECRET_DAY_ORGANISER";
 
 // SECURITY FEATURES
 app.use(helmet()); // Adds security headers (HSTS, X-XSS-Protection, etc.)
