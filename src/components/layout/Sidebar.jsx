@@ -94,7 +94,14 @@ export const Sidebar = () => {
     else if (type === 'image') content = { url: '', caption: 'New Image' };
     else if (type === 'code') content = { code: '', language: 'js' };
 
-    addNode({ type, x: targetX, y: targetY, content, color: defaultColor });
+    const newId = state.addNode({ type, x: targetX, y: targetY, content, color: defaultColor });
+    
+    setTimeout(() => {
+      const timeNeeded = window.prompt("How much time do you need to complete it?");
+      if (timeNeeded) {
+        useCanvasStore.getState().updateNodeTimeEstimate(newId, timeNeeded);
+      }
+    }, 100);
   };
 
   const colors = ['var(--surface-lowest)', 'rgba(212, 229, 239, 0.4)', 'rgba(255, 139, 154, 0.4)', 'rgba(203, 231, 245, 0.4)', 'rgba(248, 249, 250, 0.8)'];

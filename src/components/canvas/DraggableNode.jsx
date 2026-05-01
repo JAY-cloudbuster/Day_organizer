@@ -1,11 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useDrag } from '@use-gesture/react';
 import { useCanvasStore } from '../../store/useCanvasStore';
+import { useExecutionStore } from '../../store/useExecutionStore';
 import { X, Palette, Move } from 'lucide-react';
 import clsx from 'clsx';
 
 export const DraggableNode = ({ node, children }) => {
   const { updateNodePosition, zoom, activeTool, deleteNode, updateNodeColor, connectingFrom, setConnectingFrom, addEdge, nodes, updateNodeDimensions } = useCanvasStore();
+  const activeElementId = useExecutionStore(state => state.activeElementId);
+  const completedElements = useExecutionStore(state => state.completedElements);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [moveMode, setMoveMode] = useState(false);
   const nodeRef = useRef(null);
@@ -69,13 +72,16 @@ export const DraggableNode = ({ node, children }) => {
 
   const colors = ['#ffffff', '#f1f4f6', '#d4e5ef', '#e7f5cb', '#cbe7f5', '#2b3437'];
 
+  const isActive = activeElementId === node.id;
+  const isCompleted = completedElements.includes(node.id);
+
   return (
     <div 
       ref={nodeRef}
       data-nodeid={node.id}
       onDoubleClick={(e) => { e.stopPropagation(); setMoveMode(true); }}
-      className={clsx("draggable-wrapper group", activeTool === 'connect' && "cursor-crosshair")}
-      style={{ left: node.x, top: node.y, backgroundColor: node.color }}
+      className={clsx("draggable-wrapper group", activeTool === 'connect' && "cursor-crosshair", isActive && "ring-4 ring-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.5)]")}
+      style={{ left: node.x, top: node.y, backgroundColor: node.color, opacity: isCompleted ? 0.6 : 1, transition: 'all 0.3s ease' }}
     >
       <div className="relative">
         <div
@@ -123,6 +129,13 @@ export const DraggableNode = ({ node, children }) => {
         <div style={{ pointerEvents: moveMode ? 'none' : 'auto' }}>
           {children}
         </div>
+
+        {node.timeEstimate && (
+          <div className="absolute -top-3 left-4 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md z-[100] pointer-events-auto border transition-transform hover:scale-105"
+               style={{ backgroundColor: 'var(--surface-high)', color: 'var(--text-main)', borderColor: 'var(--ghost-border)' }}>
+            ⏳ {node.timeEstimate}
+          </div>
+        )}
       </div>
     </div>
   );

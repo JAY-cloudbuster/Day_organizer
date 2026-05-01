@@ -38,7 +38,7 @@ export const useCanvasStore = create((set, get) => ({
   setConnectingFrom: (id) => set({ connectingFrom: id }),
 
   addNode: (node) => {
-    const id = crypto.randomUUID();
+    const id = node.id || crypto.randomUUID();
     // Default color provided if not specified
     const finalNode = { ...node, id, color: node.color || 'var(--surface-lowest)' };
     set((state) => ({ 
@@ -46,6 +46,7 @@ export const useCanvasStore = create((set, get) => ({
       saveStatus: 'saving'
     }));
     get().triggerAutoSave();
+    return id;
   },
   
   deleteNode: (id) => {
@@ -60,6 +61,14 @@ export const useCanvasStore = create((set, get) => ({
   updateNodePosition: (id, x, y) => {
     set((state) => ({
       nodes: state.nodes.map(n => n.id === id ? { ...n, x, y } : n),
+      saveStatus: 'saving'
+    }));
+    get().triggerAutoSave();
+  },
+  
+  updateNodeTimeEstimate: (id, timeEstimate) => {
+    set((state) => ({
+      nodes: state.nodes.map(n => n.id === id ? { ...n, timeEstimate } : n),
       saveStatus: 'saving'
     }));
     get().triggerAutoSave();
@@ -88,17 +97,28 @@ export const useCanvasStore = create((set, get) => ({
   },
 
   addEdge: (from, to) => {
-    if (from === to) return;
+    if (from === to) return null;
     const exists = get().edges.find(e => e.from === from && e.to === to);
     if (!exists) {
+      const id = crypto.randomUUID();
       set((state) => ({ 
-        edges: [...state.edges, { id: crypto.randomUUID(), from, to }],
+        edges: [...state.edges, { id, from, to }],
         connectingFrom: null,
         activeTool: 'select',
         saveStatus: 'saving' 
       }));
       get().triggerAutoSave();
+      return id;
     }
+    return exists.id;
+  },
+
+  updateEdgeTimeEstimate: (id, timeEstimate) => {
+    set((state) => ({
+      edges: state.edges.map(e => e.id === id ? { ...e, timeEstimate } : e),
+      saveStatus: 'saving'
+    }));
+    get().triggerAutoSave();
   },
 
   setPan: (x, y) => set({ pan: { x, y } }),

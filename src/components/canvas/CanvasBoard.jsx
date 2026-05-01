@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useGesture } from '@use-gesture/react';
 import { useCanvasStore } from '../../store/useCanvasStore';
+import { useExecutionStore, parseTime } from '../../store/useExecutionStore';
 import { DraggableNode } from './DraggableNode';
 // Imported Node Types
 import { ToDoNode } from './nodes/ToDoNode';
@@ -27,6 +28,9 @@ const NodeRenderer = ({ node }) => {
 
 export const CanvasBoard = () => {
   const { pan, zoom, setPan, setZoom, nodes, edges, activeTool, addNode, setActiveTool, addEdge } = useCanvasStore();
+  const activeElementId = useExecutionStore(state => state.activeElementId);
+  const completedElements = useExecutionStore(state => state.completedElements);
+  const timeRemaining = useExecutionStore(state => state.timeRemaining);
   const containerRef = useRef(null);
   const [ghostEdge, setGhostEdge] = useState(null);
 
@@ -64,8 +68,16 @@ export const CanvasBoard = () => {
             });
             
             if (droppedOnNode) {
-              addEdge(ghostEdge.fromId, droppedOnNode.id);
+              const newEdgeId = addEdge(ghostEdge.fromId, droppedOnNode.id);
               setActiveTool('select'); 
+              if (newEdgeId) {
+                setTimeout(() => {
+                  const timeNeeded = window.prompt("How much time do you need to break?");
+                  if (timeNeeded) {
+                    useCanvasStore.getState().updateEdgeTimeEstimate(newEdgeId, timeNeeded);
+                  }
+                }, 100);
+              }
             }
             setGhostEdge(null);
           }
@@ -130,6 +142,9 @@ export const CanvasBoard = () => {
             <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
               <polygon points="0 0, 10 3.5, 0 7" fill="var(--accent-primary)" />
             </marker>
+            <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
+            </marker>
           </defs>
           
           {edges.map(edge => {
@@ -163,11 +178,54 @@ export const CanvasBoard = () => {
             const endX = cx1 + dx * t;
             const endY = cy1 + dy * t;
 
+            const midX = (cx1 + endX) / 2;
+            const midY = (cy1 + endY) / 2;
+
+            const isActive = activeElementId === edge.id;
+            const isCompleted = completedElements.includes(edge.id);
+            
+            const length = Math.sqrt(Math.pow(endX - cx1, 2) + Math.pow(endY - cy1, 2));
+            const totalTime = Math.max(0.1, parseTime(edge.timeEstimate));
+            const progress = isActive ? Math.max(0, Math.min(1, (totalTime - timeRemaining) / totalTime)) : (isCompleted ? 1 : 0);
+            const dashOffset = length * (1 - progress);
+
             return (
-              <line 
-                key={edge.id} x1={cx1} y1={cy1} x2={endX} y2={endY} 
-                stroke="var(--accent-primary)" strokeWidth="3" markerEnd="url(#arrowhead)" 
-              />
+              <g key={edge.id}>
+                {/* Base Line */}
+                <line 
+                  x1={cx1} y1={cy1} x2={endX} y2={endY} 
+                  stroke={isCompleted ? '#ef4444' : 'var(--accent-primary)'} strokeWidth="3" markerEnd={isCompleted ? "url(#arrowhead-red)" : "url(#arrowhead)"} 
+                />
+                
+                {/* Active Progress Overlay */}
+                {(isActive || isCompleted) && (
+                  <line 
+                    x1={cx1} y1={cy1} x2={endX} y2={endY} 
+                    stroke="#ef4444" strokeWidth="4" 
+                    strokeDasharray={length}
+                    strokeDashoffset={dashOffset}
+                    style={{ transition: isActive ? 'stroke-dashoffset 1s linear' : 'none', pointerEvents: 'none' }}
+                  />
+                )}
+                {edge.timeEstimate && (
+                  <g transform={`translate(${midX}, ${midY})`}>
+                    <rect 
+                      x="-40" y="-14" width="80" height="28" rx="14" 
+                      fill="var(--surface-high)" stroke="var(--ghost-border)" strokeWidth="1"
+                    />
+                    <text 
+                      x="0" y="4" 
+                      fill="var(--text-main)" 
+                      fontSize="10" 
+                      fontWeight="bold" 
+                      textAnchor="middle"
+                      style={{ pointerEvents: 'none' }}
+                    >
+                      ⏳ {edge.timeEstimate}
+                    </text>
+                  </g>
+                )}
+              </g>
             );
           })}
 

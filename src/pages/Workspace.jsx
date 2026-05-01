@@ -4,6 +4,7 @@ import { CanvasBoard } from '../components/canvas/CanvasBoard';
 import { GlassNavbar } from '../components/layout/GlassNavbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { FloatingToolbar } from '../components/layout/FloatingToolbar';
+import { ExecutionToolbar } from '../components/layout/ExecutionToolbar';
 import { useCanvasStore } from '../store/useCanvasStore';
 
 export const Workspace = () => {
@@ -36,12 +37,8 @@ export const Workspace = () => {
       
       {!isIsolated && <FloatingToolbar />}
       
-      {/* Visual Project Title */}
-      {!isIsolated && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 glass-pill px-6 py-2 shadow-lg backdrop-blur-md font-bold" style={{ color: 'var(--text-main)' }}>
-          {currentProjectTitle || 'Loading Workspace...'}
-        </div>
-      )}
+      {/* Execution Engine Toolbar */}
+      {!isIsolated && <ExecutionToolbar />}
 
       {/* Isolate Zen Mode Toggle */}
       <button 
