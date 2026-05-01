@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCanvasStore } from '../store/useCanvasStore';
-import { Loader2, Moon, Sun } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, Mail, Lock, ArrowRight } from 'lucide-react';
+
+const VIDEO_URL =
+  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4';
+
+const fadeStyle = (delayMs) => ({
+  animationDelay: `${delayMs}ms`,
+});
 
 export const Auth = () => {
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const navigate = useNavigate();
-  const { theme, toggleTheme, setAuthToken } = useCanvasStore();
+  const { setAuthToken } = useCanvasStore();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,35 +22,40 @@ export const Auth = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
+    /* Force dark appearance on auth page to match cinematic vibe */
+    const prev = document.body.getAttribute('data-theme');
+    document.body.setAttribute('data-theme', 'dark');
+    return () => {
+      if (prev) document.body.setAttribute('data-theme', prev);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
     setError(''); setMsg('');
     setLoading(true);
-    
+
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const res = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || "Authentication failed");
+      if (!res.ok) throw new Error(data.error || 'Authentication failed');
 
       if (isLogin) {
         setAuthToken(data.token);
-        navigate('/dashboard');
+        navigate('/landing');
       } else {
         setMsg('Registration successful! You can now login.');
         setIsLogin(true);
         setPassword('');
       }
-    } catch(err) {
+    } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -51,59 +63,104 @@ export const Auth = () => {
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center relative overflow-hidden bg-cover bg-center transition-colors duration-500" style={{ backgroundColor: 'var(--bg-primary)' }}>
-      {/* Background Floating Nodes */}
-      <div className="absolute top-[10%] left-[10%] w-[50vw] h-[50vw] rounded-full blur-[120px] opacity-20 pointer-events-none transition-all duration-1000" style={{ backgroundColor: 'var(--accent-primary)' }} />
-      <div className="absolute bottom-[10%] right-[10%] w-[40vw] h-[40vw] rounded-full blur-[100px] opacity-20 pointer-events-none transition-all duration-1000" style={{ backgroundColor: 'var(--accent-secondary)' }} />
-      
-      {/* Absolute Theme Toggle */}
-      <button 
-        onClick={toggleTheme} 
-        className="absolute top-8 right-8 p-3 rounded-full hover:scale-110 transition-transform shadow-lg z-50 glass-panel" 
-        style={{ color: 'var(--text-main)', borderColor: 'var(--ghost-border)' }}
-        title="Toggle Theme"
-      >
-        {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
-      </button>
+    <div className="landing-page">
+      {/* ── Background Video ── */}
+      <video
+        className="landing-video-bg"
+        src={VIDEO_URL}
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
 
-      <div className="glass-panel w-full max-w-sm p-10 z-10 relative shadow-2xl border" style={{ borderColor: 'var(--ghost-border)', backgroundColor: 'var(--surface-high)' }}>
-        <div className="flex justify-center mb-4">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-3xl shadow-lg" style={{ backgroundColor: 'var(--accent-primary)', color: '#fff' }}>D</div>
-        </div>
-        <div className="text-3xl font-black text-center mb-2 tracking-tight" style={{ color: 'var(--text-main)' }}>Daily Canvas</div>
-        <p className="text-center text-sm font-medium mb-8" style={{ color: 'var(--text-muted)' }}>{isLogin ? 'Enter the engineering studio.' : 'Create your secure profile.'}</p>
+      {/* ── Bottom Blur Overlay ── */}
+      <div className="landing-blur-overlay" />
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {error && <span className="text-red-500 text-xs text-center">{error}</span>}
-          {msg && <span className="text-green-500 text-xs text-center">{msg}</span>}
-          
-          <input 
-            type="email" placeholder="Email address" required
-            value={email} onChange={e => setEmail(e.target.value)}
-            className="w-full p-4 rounded-xl outline-none transition-colors border"
-            style={{ backgroundColor: 'var(--surface-high)', borderColor: 'var(--ghost-border)', color: 'var(--text-main)' }}
-          />
-          <input 
-            type="password" placeholder="Password" required
-            value={password} onChange={e => setPassword(e.target.value)}
-            className="w-full p-4 rounded-xl outline-none transition-colors border"
-            style={{ backgroundColor: 'var(--surface-high)', borderColor: 'var(--ghost-border)', color: 'var(--text-main)' }}
-          />
-          
-          <button 
-            type="submit" disabled={loading}
-            className="w-full p-4 rounded-xl font-bold mt-2 hover:scale-[1.02] flex items-center justify-center gap-2 transition-all active:scale-95 disabled:scale-100 disabled:opacity-70"
-            style={{ background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-primary-dim))', color: '#fff' }}
-          >
-            {loading ? <Loader2 size={20} className="animate-spin" /> : null}
-            {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Register Securely')}
-          </button>
-        </form>
+      {/* ── Centered Auth Card ── */}
+      <div className="auth-container">
+        <div className="auth-card animate-blur-fade-up" style={fadeStyle(100)}>
+          {/* Logo mark */}
+          <div className="auth-logo animate-blur-fade-up" style={fadeStyle(0)}>
+            <div className="auth-logo__icon">D</div>
+          </div>
 
-        <div className="text-center mt-6 text-sm" style={{ color: 'var(--text-muted)' }}>
-          <button onClick={() => setIsLogin(!isLogin)} className="font-bold hover:underline" style={{ color: 'var(--accent-primary)' }}>
-            {isLogin ? "Need an account? Register." : "Already registered? Sign in."}
-          </button>
+          <h1 className="auth-title animate-blur-fade-up" style={fadeStyle(150)}>
+            Daily Canvas
+          </h1>
+          <p className="auth-subtitle animate-blur-fade-up" style={fadeStyle(200)}>
+            {isLogin
+              ? 'Welcome back. Sign in to continue.'
+              : 'Create your secure profile.'}
+          </p>
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            {error && (
+              <div className="auth-msg auth-msg--error animate-blur-fade-up" style={fadeStyle(250)}>
+                {error}
+              </div>
+            )}
+            {msg && (
+              <div className="auth-msg auth-msg--success animate-blur-fade-up" style={fadeStyle(250)}>
+                {msg}
+              </div>
+            )}
+
+            <div className="auth-input-wrap animate-blur-fade-up" style={fadeStyle(300)}>
+              <Mail size={18} className="auth-input-icon" />
+              <input
+                type="email"
+                placeholder="Email address"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="auth-input"
+              />
+            </div>
+
+            <div className="auth-input-wrap animate-blur-fade-up" style={fadeStyle(400)}>
+              <Lock size={18} className="auth-input-icon" />
+              <input
+                type="password"
+                placeholder="Password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="auth-input"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="auth-submit animate-blur-fade-up"
+              style={fadeStyle(500)}
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={20} className="auth-spinner" />
+                  Processing...
+                </>
+              ) : isLogin ? (
+                <>
+                  <LogIn size={18} />
+                  Sign In
+                  <ArrowRight size={16} className="auth-submit__arrow" />
+                </>
+              ) : (
+                <>
+                  <UserPlus size={18} />
+                  Register Securely
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="auth-switch animate-blur-fade-up" style={fadeStyle(600)}>
+            <button onClick={() => { setIsLogin(!isLogin); setError(''); setMsg(''); }}>
+              {isLogin ? "Need an account? Register." : "Already registered? Sign in."}
+            </button>
+          </div>
         </div>
       </div>
     </div>
