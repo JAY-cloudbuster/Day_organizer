@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCanvasStore } from '../../../store/useCanvasStore';
 import { MoreHorizontal } from 'lucide-react';
+import { TimeEstimateBadge } from './TimeEstimateBadge';
 
 export const ProjectNode = ({ node }) => {
   const updateNodeContent = useCanvasStore(state => state.updateNodeContent);
@@ -44,6 +45,8 @@ export const ProjectNode = ({ node }) => {
             +2
           </div>
         </div>
+
+        <TimeEstimateBadge nodeId={node.id} />
       </div>
     </div>
   );

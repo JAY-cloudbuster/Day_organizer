@@ -1,6 +1,7 @@
 import React from 'react';
 import { useCanvasStore } from '../../../store/useCanvasStore';
 import { Image as ImageIcon } from 'lucide-react';
+import { TimeEstimateBadge } from './TimeEstimateBadge';
 
 export const ImageNode = ({ node }) => {
   const updateNodeContent = useCanvasStore(state => state.updateNodeContent);
@@ -29,6 +30,7 @@ export const ImageNode = ({ node }) => {
         className="text-sm font-medium text-center bg-transparent border-none outline-none mt-2 w-full pointer-events-auto"
         style={{ color: 'var(--text-muted)' }}
       />
+      <TimeEstimateBadge nodeId={node.id} />
     </div>
   );
 };

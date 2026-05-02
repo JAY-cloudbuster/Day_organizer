@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useCanvasStore } from '../../../store/useCanvasStore';
 import { GripHorizontal, Plus, Check } from 'lucide-react';
+import { TimeEstimateBadge } from './TimeEstimateBadge';
 
 export const ToDoNode = ({ node }) => {
   const updateNodeContent = useCanvasStore(state => state.updateNodeContent);
@@ -87,6 +88,8 @@ export const ToDoNode = ({ node }) => {
       >
         <Plus size={20} />
       </button>
+
+      <TimeEstimateBadge nodeId={node.id} />
     </div>
   );
 };
