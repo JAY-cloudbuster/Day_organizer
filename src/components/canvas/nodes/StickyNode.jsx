@@ -7,7 +7,7 @@ export const StickyNode = ({ node }) => {
 
   return (
     <div className="card w-64 p-4 cursor-grab active:cursor-grabbing hover:shadow-xl transition-shadow"
-         style={{ backgroundColor: node.color }}>
+         style={{ backgroundColor: node.color, borderLeft: '3px solid #f59e0b' }}>
       <input 
         value={title}
         onChange={(e) => updateNodeContent(node.id, { title: e.target.value })}

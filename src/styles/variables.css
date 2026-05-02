@@ -1,9 +1,9 @@
 :root {
   /* Light Mode Palette */
   --bg-primary: #f8f9fa;
-  --accent-primary: #506169;
-  --accent-primary-dim: #45555d;
-  --accent-secondary: #49636f;
+  --accent-primary: #5b5fc7;
+  --accent-primary-dim: #4a4eb3;
+  --accent-secondary: #2bb5a0;
   
   --text-main: #2b3437;
   --text-muted: #586064;
@@ -26,9 +26,9 @@
 [data-theme='dark'] {
   /* Dark Mode Palette */
   --bg-primary: #1e2527;
-  --accent-primary: #8ca3af;
-  --accent-primary-dim: #708691;
-  --accent-secondary: #cbe7f5;
+  --accent-primary: #818cf8;
+  --accent-primary-dim: #6b72e8;
+  --accent-secondary: #5eead4;
   
   --text-main: #f8f9fa;
   --text-muted: #abb3b7;
@@ -70,4 +70,15 @@ button {
 
 input, textarea {
   font-family: inherit;
+}
+
+/* Upgrade 5: Smooth theme crossfade on all UI chrome */
+.card,
+.glass-panel,
+.glass-pill,
+nav,
+aside {
+  transition: background-color 0.4s ease,
+             border-color 0.4s ease,
+             box-shadow 0.4s ease;
 }

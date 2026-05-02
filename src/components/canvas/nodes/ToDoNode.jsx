@@ -26,6 +26,7 @@ export const ToDoNode = ({ node }) => {
   return (
     <div 
       className="card flex flex-col p-6 cursor-grab active:cursor-grabbing w-80 relative"
+      style={{ borderLeft: '3px solid #818cf8' }}
       onPointerDown={(e) => e.stopPropagation()} // Let drag happen on the wrapper, but inputs need focus
     >
       <div className="flex justify-between items-start mb-4">

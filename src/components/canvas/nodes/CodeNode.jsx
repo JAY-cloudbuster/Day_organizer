@@ -6,7 +6,7 @@ export const CodeNode = ({ node }) => {
   const { code, language } = node.content;
 
   return (
-    <div className="card w-[400px] overflow-hidden cursor-grab active:cursor-grabbing border-none" style={{ backgroundColor: '#1e1e1e', color: '#d4d4d4', boxShadow: '0 20px 40px rgba(0,0,0,0.5)' }}>
+    <div className="card w-[400px] overflow-hidden cursor-grab active:cursor-grabbing border-none" style={{ backgroundColor: '#1e1e1e', color: '#d4d4d4', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', borderLeft: '3px solid #10b981' }}>
       <div className="flex items-center px-4 py-2 bg-[#2d2d2d] border-b border-black/20 pointer-events-auto">
         <div className="flex gap-1.5 mr-4">
           <div className="w-3 h-3 rounded-full bg-red-500" />

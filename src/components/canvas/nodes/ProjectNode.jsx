@@ -8,6 +8,7 @@ export const ProjectNode = ({ node }) => {
 
   return (
     <div className="card w-96 overflow-hidden cursor-grab active:cursor-grabbing hover:shadow-2xl transition-shadow"
+         style={{ borderLeft: '3px solid #6366f1' }}
          onPointerDown={e => e.stopPropagation()}>
       <div className="h-2 w-full" style={{ backgroundColor: 'var(--accent-primary)' }} />
       <div className="p-6">

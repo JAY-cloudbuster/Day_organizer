@@ -7,7 +7,7 @@ export const ImageNode = ({ node }) => {
   const { url, caption } = node.content;
 
   return (
-    <div className="card w-72 p-2 cursor-grab active:cursor-grabbing overflow-hidden" style={{ backgroundColor: node.color }}>
+    <div className="card w-72 p-2 cursor-grab active:cursor-grabbing overflow-hidden" style={{ backgroundColor: node.color, borderLeft: '3px solid #ec4899' }}>
       <div className="w-full h-40 bg-gray-100 flex items-center justify-center rounded-lg overflow-hidden relative pointer-events-auto group">
         {url ? (
           <img src={url} alt="User placed" className="w-full h-full object-cover" />
