@@ -58,6 +58,13 @@ export const useCanvasStore = create((set, get) => ({
     get().triggerAutoSave();
   },
 
+  clearCanvas: () => {
+    if (window.confirm("Are you sure you want to clear the entire canvas? This action cannot be undone.")) {
+      set({ nodes: [], edges: [], saveStatus: 'saving' });
+      get().triggerAutoSave();
+    }
+  },
+
   updateNodePosition: (id, x, y) => {
     set((state) => ({
       nodes: state.nodes.map(n => n.id === id ? { ...n, x, y } : n),
