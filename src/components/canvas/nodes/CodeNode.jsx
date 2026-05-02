@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCanvasStore } from '../../../store/useCanvasStore';
+import { TimeEstimateBadge } from './TimeEstimateBadge';
 
 export const CodeNode = ({ node }) => {
   const updateNodeContent = useCanvasStore(state => state.updateNodeContent);
@@ -28,6 +29,9 @@ export const CodeNode = ({ node }) => {
         className="text-sm p-4 bg-transparent border-none outline-none w-full resize-none pointer-events-auto leading-relaxed font-mono"
         style={{ minHeight: '120px' }}
       />
+      <div style={{ padding: '0 16px 8px' }}>
+        <TimeEstimateBadge nodeId={node.id} />
+      </div>
     </div>
   );
 };
