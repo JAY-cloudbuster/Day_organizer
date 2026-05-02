@@ -4,7 +4,6 @@ import { CanvasBoard } from '../components/canvas/CanvasBoard';
 import { GlassNavbar } from '../components/layout/GlassNavbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { FloatingToolbar } from '../components/layout/FloatingToolbar';
-import { ExecutionToolbar } from '../components/layout/ExecutionToolbar';
 import { useCanvasStore } from '../store/useCanvasStore';
 
 const VIDEO_URL =
@@ -51,7 +50,6 @@ export const Workspace = () => {
         <CanvasBoard />
 
         {!isIsolated && <FloatingToolbar />}
-        {!isIsolated && <ExecutionToolbar />}
 
         {/* Zen Mode Toggle */}
         <button
