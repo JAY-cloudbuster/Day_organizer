@@ -94,14 +94,58 @@ export const Sidebar = () => {
     else if (type === 'image') content = { url: '', caption: 'New Image' };
     else if (type === 'code') content = { code: '', language: 'js' };
 
-    const newId = state.addNode({ type, x: targetX, y: targetY, content, color: defaultColor });
+    state.addNode({ type, x: targetX, y: targetY, content, color: defaultColor });
+  };
+
+  const insertTemplate = (templateKey) => {
+    const state = useCanvasStore.getState();
+    const currentPanX = state.pan.x;
+    const currentPanY = state.pan.y;
+    const viewportCenterX = (window.innerWidth / 2 - currentPanX) / zoom;
+    const viewportCenterY = (window.innerHeight / 2 - currentPanY) / zoom;
     
-    setTimeout(() => {
-      const timeNeeded = window.prompt("How much time do you need to complete it?");
-      if (timeNeeded) {
-        useCanvasStore.getState().updateNodeTimeEstimate(newId, timeNeeded);
-      }
-    }, 100);
+    const baseX = viewportCenterX - 150;
+    const baseY = viewportCenterY - 100;
+    const col = defaultColor;
+
+    if (templateKey === 'kanban') {
+       const id1 = crypto.randomUUID();
+       const id2 = crypto.randomUUID();
+       const id3 = crypto.randomUUID();
+       
+       state.addNode({ id: id1, type: 'todo', x: baseX, y: baseY, content: { title: 'To Do', tasks: [] }, color: col });
+       state.addNode({ id: id2, type: 'todo', x: baseX + 380, y: baseY, content: { title: 'In Progress', tasks: [] }, color: col });
+       state.addNode({ id: id3, type: 'todo', x: baseX + 760, y: baseY, content: { title: 'Done', tasks: [] }, color: col });
+    } else if (templateKey === 'feature') {
+       const id1 = crypto.randomUUID();
+       const id2 = crypto.randomUUID();
+       const id3 = crypto.randomUUID();
+       
+       state.addNode({ id: id1, type: 'project', x: baseX, y: baseY, content: { title: 'New Feature', desc: 'Feature spec...', status: 'Ideas' }, color: col });
+       state.addNode({ id: id2, type: 'sticky', x: baseX + 450, y: baseY, content: { title: 'Requirements', text: '' }, color: col });
+       state.addNode({ id: id3, type: 'image', x: baseX + 450, y: baseY + 200, content: { url: '', caption: 'Mockup' }, color: col });
+       
+       setTimeout(() => {
+           state.addEdge(id1, id2);
+           state.addEdge(id1, id3);
+       }, 50);
+    } else if (templateKey === 'weekly_goal') {
+       const idMain = crypto.randomUUID();
+       const idTask1 = crypto.randomUUID();
+       const idTask2 = crypto.randomUUID();
+       const idTask3 = crypto.randomUUID();
+       
+       state.addNode({ id: idMain, type: 'priority', x: baseX, y: baseY, content: { title: 'Weekly Goal' }, color: col });
+       state.addNode({ id: idTask1, type: 'todo', x: baseX + 300, y: baseY - 200, content: { title: 'Goal 1', tasks: [] }, color: col });
+       state.addNode({ id: idTask2, type: 'todo', x: baseX + 350, y: baseY, content: { title: 'Goal 2', tasks: [] }, color: col });
+       state.addNode({ id: idTask3, type: 'todo', x: baseX + 300, y: baseY + 200, content: { title: 'Goal 3', tasks: [] }, color: col });
+       
+       setTimeout(() => {
+           state.addEdge(idMain, idTask1);
+           state.addEdge(idMain, idTask2);
+           state.addEdge(idMain, idTask3);
+       }, 50);
+    }
   };
 
   const colors = ['var(--surface-lowest)', 'rgba(212, 229, 239, 0.4)', 'rgba(255, 139, 154, 0.4)', 'rgba(203, 231, 245, 0.4)', 'rgba(248, 249, 250, 0.8)'];
@@ -143,7 +187,12 @@ export const Sidebar = () => {
         )}
         
         {activeTab === 'library' && (
-          <div className="text-center mt-10 text-sm" style={{ color: 'var(--text-muted)' }}>Library empty.<br/>Save templates here.</div>
+          <>
+            <div className="text-[10px] font-bold uppercase tracking-wider mb-2 mt-2" style={{ color: 'var(--text-muted)' }}>Ready-Made Templates</div>
+            <ComponentDraggable name="Kanban Board" desc="To Do, In Progress, Done" icon={<Layers />} onClick={() => insertTemplate('kanban')} />
+            <ComponentDraggable name="Feature Spec" desc="Project, notes & mockup" icon={<Square />} onClick={() => insertTemplate('feature')} />
+            <ComponentDraggable name="Weekly Goal" desc="Central goal with 3 tasks" icon={<Circle />} onClick={() => insertTemplate('weekly_goal')} />
+          </>
         )}
 
         {activeTab === 'settings' && (
