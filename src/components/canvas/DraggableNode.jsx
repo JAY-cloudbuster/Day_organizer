@@ -129,13 +129,6 @@ export const DraggableNode = ({ node, children }) => {
         <div style={{ pointerEvents: moveMode ? 'none' : 'auto' }}>
           {children}
         </div>
-
-        {node.timeEstimate && (
-          <div className="absolute -top-3 left-4 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md z-[100] pointer-events-auto border transition-transform hover:scale-105"
-               style={{ backgroundColor: 'var(--surface-high)', color: 'var(--text-main)', borderColor: 'var(--ghost-border)' }}>
-            ⏳ {node.timeEstimate}
-          </div>
-        )}
       </div>
     </div>
   );
