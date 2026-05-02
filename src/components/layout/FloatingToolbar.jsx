@@ -1,14 +1,41 @@
 import React from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
-import { MousePointer2, Hand, MessageSquarePlus, ZoomIn, ZoomOut, Unlink } from 'lucide-react';
+import { useExecutionStore } from '../../store/useExecutionStore';
+import { MousePointer2, Hand, MessageSquarePlus, ZoomIn, ZoomOut, Unlink, Play, Pause, Square, FastForward, Timer, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 
+const formatTime = (totalSeconds) => {
+  const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+  const s = (totalSeconds % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+};
+
 export const FloatingToolbar = () => {
-  const { zoom, setZoom, activeTool, setActiveTool, setConnectingFrom, connectingFrom } = useCanvasStore();
+  const { zoom, setZoom, activeTool, setActiveTool, setConnectingFrom, connectingFrom, nodes, edges, clearCanvas } = useCanvasStore();
+  const { status, timeRemaining, start, pause, resume, stop, skip, activeElementId } = useExecutionStore();
+
+  // Derive active task title
+  let activeTitle = '';
+  if (status !== 'idle' && status !== 'completed' && activeElementId) {
+    const isNode = nodes.some(n => n.id === activeElementId);
+    if (isNode) {
+      const node = nodes.find(n => n.id === activeElementId);
+      activeTitle = node?.content?.title || 'Task';
+    } else {
+      activeTitle = 'Break';
+    }
+  } else if (status === 'completed') {
+    activeTitle = 'Done!';
+  }
+
+  const isActive = status === 'running' || status === 'paused';
+  const isRunning = status === 'running';
 
   return (
-    <div className="glass-pill fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center p-2 z-50">
+    <div className="glass-pill fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center p-2 z-50"
+         style={{ gap: '2px' }}>
       
+      {/* ── Tool Section ── */}
       <ToolButton 
         icon={<MousePointer2 size={18} />} 
         active={activeTool === 'select'} 
@@ -34,6 +61,7 @@ export const FloatingToolbar = () => {
 
       <div className="w-px h-6 mx-2" style={{ backgroundColor: 'var(--ghost-border)' }} />
       
+      {/* ── Zoom Section ── */}
       <button 
         className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-black/10 dark:hover:bg-white/10"
         style={{ color: 'var(--text-muted)' }}
@@ -53,6 +81,94 @@ export const FloatingToolbar = () => {
       >
         <ZoomOut size={18} />
       </button>
+
+      <div className="w-px h-6 mx-2" style={{ backgroundColor: 'var(--ghost-border)' }} />
+
+      {/* ── Clear Canvas ── */}
+      <button 
+        className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-red-500/20 text-red-500"
+        title="Clear Canvas"
+        onClick={clearCanvas}
+      >
+        <Trash2 size={16} />
+      </button>
+
+      <div className="w-px h-6 mx-2" style={{ backgroundColor: 'var(--ghost-border)' }} />
+
+      {/* ── Execution Section (integrated into dock) ── */}
+      {isActive && (
+        <>
+          {/* Active task label */}
+          <div className="flex flex-col items-start px-2" style={{ maxWidth: '120px' }}>
+            <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: isRunning ? '#22c55e' : '#eab308' }}>
+              {isRunning ? 'Running' : 'Paused'}
+            </span>
+            <span className="text-[11px] font-bold truncate w-full" style={{ color: 'var(--text-main)' }}>
+              {activeTitle}
+            </span>
+          </div>
+
+          {/* Countdown timer */}
+          <div 
+            className="font-mono text-lg font-black tracking-tighter px-2 tabular-nums"
+            style={{ color: isRunning ? 'var(--text-main)' : 'var(--text-muted)', minWidth: '52px', textAlign: 'center' }}
+          >
+            {formatTime(timeRemaining)}
+          </div>
+
+          <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--ghost-border)' }} />
+        </>
+      )}
+
+      {/* Play/Pause/Resume button — always visible */}
+      {status === 'idle' || status === 'completed' ? (
+        <button 
+          onClick={start} 
+          title="Start Workflow"
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-md"
+          style={{ backgroundColor: 'var(--accent-primary)', color: '#fff' }}
+        >
+          <Play size={16} fill="currentColor" />
+        </button>
+      ) : isRunning ? (
+        <button 
+          onClick={pause} 
+          title="Pause"
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-md bg-amber-500 text-white"
+        >
+          <Pause size={16} fill="currentColor" />
+        </button>
+      ) : (
+        <button 
+          onClick={resume} 
+          title="Resume"
+          className="w-10 h-10 rounded-full flex items-center justify-center hover:scale-110 transition-all shadow-md"
+          style={{ backgroundColor: 'var(--accent-primary)', color: '#fff' }}
+        >
+          <Play size={16} fill="currentColor" />
+        </button>
+      )}
+
+      {/* Skip & Stop — only when active */}
+      {isActive && (
+        <>
+          <button 
+            onClick={skip} 
+            title="Skip to Next" 
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors" 
+            style={{ color: 'var(--text-muted)' }}
+          >
+            <FastForward size={14} fill="currentColor" />
+          </button>
+          <button 
+            onClick={stop} 
+            title="Stop" 
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-red-500/20 transition-colors text-red-500"
+          >
+            <Square size={14} fill="currentColor" />
+          </button>
+        </>
+      )}
     </div>
   );
 };
