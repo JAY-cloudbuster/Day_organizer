@@ -80,7 +80,7 @@ export const DraggableNode = ({ node, children }) => {
       ref={nodeRef}
       data-nodeid={node.id}
       onDoubleClick={(e) => { e.stopPropagation(); setMoveMode(true); }}
-      className={clsx("draggable-wrapper group", activeTool === 'connect' && "cursor-crosshair", isActive && "ring-4 ring-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.5)]")}
+      className={clsx("draggable-wrapper group", activeTool === 'connect' && "cursor-crosshair", isActive && "ring-4 ring-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.5)] focused-node")}
       style={{ left: node.x, top: node.y, backgroundColor: node.color, opacity: isCompleted ? 0.6 : 1, transition: 'all 0.3s ease' }}
     >
       <div className="relative">

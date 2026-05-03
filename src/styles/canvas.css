@@ -5,6 +5,27 @@
   overflow: hidden;
 }
 
+/* Aurora Mesh Gradient Background */
+.mesh-background {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--surface-bg);
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(225,39%,30%,0.2) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+  transition: background-image 2s ease;
+}
+
+.mesh-background.running {
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(20,50%,30%,0.2) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(339,49%,30%,0.2) 0, transparent 50%);
+}
+
 .canvas-container {
   width: 100%;
   height: 100%;
@@ -45,6 +66,17 @@
               0 0 0 2px rgba(129, 140, 248, 0.2),
               0 0 24px rgba(129, 140, 248, 0.08);
   filter: brightness(1.03);
+}
+
+/* Depth of Field Focus */
+.canvas-container.focus-mode .draggable-wrapper:not(.focused-node) {
+  filter: blur(4px) brightness(0.6) grayscale(50%);
+  transform: scale(0.98);
+  pointer-events: none;
+}
+.canvas-container.focus-mode .draggable-wrapper.focused-node {
+  z-index: 1000;
+  box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.4), 0 20px 40px rgba(0,0,0,0.4);
 }
 
 .draggable-wrapper.dragging {

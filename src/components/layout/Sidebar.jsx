@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
-import { Square, Circle, FileText, Layers, Settings, Library, StickyNote, Image, Code, ArrowRight } from 'lucide-react';
+import { Square, Circle, FileText, Layers, Settings, Library, StickyNote, Image, Code, ArrowRight, Sparkles } from 'lucide-react';
 
 export const Sidebar = () => {
   const addNode = useCanvasStore(state => state.addNode);
@@ -188,6 +188,28 @@ export const Sidebar = () => {
         
         {activeTab === 'library' && (
           <>
+            <div className="text-[10px] font-bold uppercase tracking-wider mb-2 mt-2 flex items-center gap-1 text-purple-500">
+              <Sparkles size={12} /> Magic Generation
+            </div>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const prompt = e.target.elements.prompt.value;
+              if (!prompt) return;
+              e.target.elements.prompt.value = '';
+              const state = useCanvasStore.getState();
+              insertTemplate('kanban'); // Mock AI generation for now
+            }} className="mb-4">
+              <input 
+                name="prompt"
+                type="text" 
+                placeholder="E.g. 'Launch plan'" 
+                className="w-full text-xs p-2 rounded-lg bg-black/5 dark:bg-white/5 border outline-none focus:ring-2 focus:ring-purple-500/50"
+                style={{ borderColor: 'var(--ghost-border)', color: 'var(--text-main)' }}
+              />
+            </form>
+
+            <div className="w-full h-px my-2 opacity-20" style={{ backgroundColor: 'var(--ghost-border)' }} />
+
             <div className="text-[10px] font-bold uppercase tracking-wider mb-2 mt-2" style={{ color: 'var(--text-muted)' }}>Ready-Made Templates</div>
             <ComponentDraggable name="Kanban Board" desc="To Do, In Progress, Done" icon={<Layers />} onClick={() => insertTemplate('kanban')} />
             <ComponentDraggable name="Feature Spec" desc="Project, notes & mockup" icon={<Square />} onClick={() => insertTemplate('feature')} />

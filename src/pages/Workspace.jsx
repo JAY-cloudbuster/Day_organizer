@@ -5,6 +5,7 @@ import { GlassNavbar } from '../components/layout/GlassNavbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { FloatingToolbar } from '../components/layout/FloatingToolbar';
 import { useCanvasStore } from '../store/useCanvasStore';
+import { useExecutionStore } from '../store/useExecutionStore';
 
 const VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4';
@@ -13,10 +14,22 @@ export const Workspace = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { saveStatus, theme, loadProject, currentProjectTitle } = useCanvasStore();
+  const { status } = useExecutionStore();
   const [isIsolated, setIsIsolated] = useState(false);
 
   useEffect(() => {
     document.body.setAttribute('data-theme', 'dark');
+
+    const handleMouseMove = (e) => {
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
   }, []);
 
   useEffect(() => {
@@ -40,7 +53,7 @@ export const Workspace = () => {
         muted
         playsInline
       />
-      <div className="workspace-cinematic__overlay" />
+      <div className={`mesh-background ${status === 'running' ? 'running' : ''}`} />
 
       {/* ── Canvas Layer ── */}
       <div className="workspace-cinematic__content">

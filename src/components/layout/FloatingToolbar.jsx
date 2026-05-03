@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useExecutionStore } from '../../store/useExecutionStore';
-import { MousePointer2, Hand, MessageSquarePlus, ZoomIn, ZoomOut, Unlink, Play, Pause, Square, FastForward, Timer, Trash2 } from 'lucide-react';
+import { MousePointer2, Hand, MessageSquarePlus, ZoomIn, ZoomOut, Unlink, Play, Pause, Square, FastForward, Timer, Trash2, Volume2, VolumeX } from 'lucide-react';
 import clsx from 'clsx';
 
 const formatTime = (totalSeconds) => {
@@ -13,6 +13,53 @@ const formatTime = (totalSeconds) => {
 export const FloatingToolbar = () => {
   const { zoom, setZoom, activeTool, setActiveTool, setConnectingFrom, connectingFrom, nodes, edges, clearCanvas } = useCanvasStore();
   const { status, timeRemaining, start, pause, resume, stop, skip, activeElementId } = useExecutionStore();
+
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const audioCtxRef = useRef(null);
+  const noiseNodeRef = useRef(null);
+
+  const isActive = status === 'running' || status === 'paused';
+  const isRunning = status === 'running';
+
+  useEffect(() => {
+    if (audioEnabled && isRunning) {
+      if (!audioCtxRef.current) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtxRef.current = new AudioContext();
+        const bufferSize = audioCtxRef.current.sampleRate * 2;
+        const buffer = audioCtxRef.current.createBuffer(1, bufferSize, audioCtxRef.current.sampleRate);
+        const output = buffer.getChannelData(0);
+        let lastOut = 0;
+        for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            output[i] = (lastOut + (0.02 * white)) / 1.02;
+            lastOut = output[i];
+            output[i] *= 3.5; 
+        }
+        noiseNodeRef.current = audioCtxRef.current.createBufferSource();
+        noiseNodeRef.current.buffer = buffer;
+        noiseNodeRef.current.loop = true;
+        
+        const filter = audioCtxRef.current.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 400; // Deep spatial focus rumble
+        
+        noiseNodeRef.current.connect(filter);
+        filter.connect(audioCtxRef.current.destination);
+        noiseNodeRef.current.start();
+      }
+    } else {
+      if (noiseNodeRef.current) {
+        noiseNodeRef.current.stop();
+        noiseNodeRef.current.disconnect();
+        noiseNodeRef.current = null;
+      }
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
+        audioCtxRef.current = null;
+      }
+    }
+  }, [audioEnabled, isRunning]);
 
   // Derive active task title
   let activeTitle = '';
@@ -27,9 +74,6 @@ export const FloatingToolbar = () => {
   } else if (status === 'completed') {
     activeTitle = 'Done!';
   }
-
-  const isActive = status === 'running' || status === 'paused';
-  const isRunning = status === 'running';
 
   return (
     <div className="glass-pill fixed bottom-10 left-1/2 -translate-x-1/2 flex items-center p-2 z-50"
@@ -152,6 +196,14 @@ export const FloatingToolbar = () => {
       {/* Skip & Stop — only when active */}
       {isActive && (
         <>
+          <button 
+            onClick={() => setAudioEnabled(!audioEnabled)} 
+            title="Toggle Focus Audio" 
+            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors" 
+            style={{ color: audioEnabled ? 'var(--accent-primary)' : 'var(--text-muted)' }}
+          >
+            {audioEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+          </button>
           <button 
             onClick={skip} 
             title="Skip to Next" 

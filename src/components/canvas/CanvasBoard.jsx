@@ -3,6 +3,7 @@ import { useGesture } from '@use-gesture/react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useExecutionStore, parseTime } from '../../store/useExecutionStore';
 import { DraggableNode } from './DraggableNode';
+import clsx from 'clsx';
 // Imported Node Types
 import { ToDoNode } from './nodes/ToDoNode';
 import { PriorityNode } from './nodes/PriorityNode';
@@ -28,6 +29,7 @@ const NodeRenderer = ({ node }) => {
 
 export const CanvasBoard = () => {
   const { pan, zoom, setPan, setZoom, nodes, edges, activeTool, addNode, setActiveTool, addEdge } = useCanvasStore();
+  const status = useExecutionStore(state => state.status);
   const activeElementId = useExecutionStore(state => state.activeElementId);
   const completedElements = useExecutionStore(state => state.completedElements);
   const timeRemaining = useExecutionStore(state => state.timeRemaining);
@@ -128,6 +130,7 @@ export const CanvasBoard = () => {
       />
       
       <div 
+        className={clsx("canvas-container", (status === 'running' || status === 'paused') && "focus-mode")}
         style={{ 
           transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
           transformOrigin: '0 0',
