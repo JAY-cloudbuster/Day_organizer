@@ -3,6 +3,7 @@ import { useDrag } from '@use-gesture/react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useExecutionStore } from '../../store/useExecutionStore';
 import { X, Palette, Move } from 'lucide-react';
+import { playDropSound } from '../../utils/haptics';
 import clsx from 'clsx';
 
 export const DraggableNode = ({ node, children }) => {
@@ -40,7 +41,7 @@ export const DraggableNode = ({ node, children }) => {
     });
   };
 
-  const bind = useDrag(({ movement: [mx, my], first, memo, dragging, event }) => {
+  const bind = useDrag(({ movement: [mx, my], first, last, memo, dragging, event }) => {
     event.stopPropagation();
 
     if (first) {
@@ -66,6 +67,10 @@ export const DraggableNode = ({ node, children }) => {
     }
 
     updateNodePosition(node.id, newX, newY);
+    
+    if (last) {
+      playDropSound();
+    }
 
     return memo;
   }, { filterTaps: true, pointerEvents: true, enabled: moveMode });

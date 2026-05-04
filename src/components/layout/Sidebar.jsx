@@ -151,7 +151,9 @@ export const Sidebar = () => {
   const colors = ['var(--surface-lowest)', 'rgba(212, 229, 239, 0.4)', 'rgba(255, 139, 154, 0.4)', 'rgba(203, 231, 245, 0.4)', 'rgba(248, 249, 250, 0.8)'];
 
   return (
-    <aside className="glass-panel fixed top-24 left-4 w-64 bottom-4 flex flex-col z-40 overflow-hidden">
+    <>
+      <div className="fixed top-0 left-0 w-8 h-full z-50 group peer" />
+      <aside className="glass-panel fixed top-24 left-4 w-64 bottom-4 flex flex-col z-40 overflow-hidden transition-transform duration-500 -translate-x-[120%] hover:translate-x-0 peer-hover:translate-x-0 shadow-2xl">
       <div className="flex border-b" style={{ borderColor: 'var(--ghost-border)' }}>
         <TabButton icon={<Layers size={18} />} title="Components" active={activeTab === 'components'} onClick={() => setActiveTab('components')} />
         <TabButton icon={<Library size={18} />} title="Library" active={activeTab === 'library'} onClick={() => setActiveTab('library')} />
@@ -226,6 +228,7 @@ export const Sidebar = () => {
         )}
       </div>
     </aside>
+    </>
   );
 };
 

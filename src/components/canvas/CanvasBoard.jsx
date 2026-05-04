@@ -12,6 +12,7 @@ import { StickyNode } from './nodes/StickyNode';
 import { ImageNode } from './nodes/ImageNode';
 import { CodeNode } from './nodes/CodeNode';
 import { CommentNode } from './nodes/CommentNode';
+import { playConnectSound, playDropSound } from '../../utils/haptics';
 import '../../styles/canvas.css';
 
 const NodeRenderer = ({ node }) => {
@@ -71,6 +72,9 @@ export const CanvasBoard = () => {
             
             if (droppedOnNode) {
               const newEdgeId = addEdge(ghostEdge.fromId, droppedOnNode.id);
+              if (newEdgeId) {
+                playConnectSound();
+              }
               setActiveTool('select'); 
               if (newEdgeId) {
                 setTimeout(() => {
@@ -118,6 +122,21 @@ export const CanvasBoard = () => {
       drag: { filterTaps: true }
     }
   );
+
+  // Canvas Virtualization (Windowing)
+  const viewportW = window.innerWidth / zoom;
+  const viewportH = window.innerHeight / zoom;
+  const viewX = -pan.x / zoom;
+  const viewY = -pan.y / zoom;
+
+  const visibleNodes = nodes.filter(n => {
+    const w = n.width || 400;
+    const h = n.height || 400;
+    return (
+      n.x + w > viewX - 1000 && n.x < viewX + viewportW + 1000 &&
+      n.y + h > viewY - 1000 && n.y < viewY + viewportH + 1000
+    );
+  });
 
   return (
     <div className={`canvas-viewport ${activeTool === 'pan' ? 'cursor-grab' : activeTool === 'comment' ? 'cursor-text' : ''}`} ref={containerRef}>
@@ -245,7 +264,7 @@ export const CanvasBoard = () => {
           })()}
         </svg>
 
-        {nodes.map(node => (
+        {visibleNodes.map(node => (
           <DraggableNode key={node.id} node={node}>
             <NodeRenderer node={node} />
           </DraggableNode>

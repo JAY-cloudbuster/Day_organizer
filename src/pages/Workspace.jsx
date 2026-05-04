@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CanvasBoard } from '../components/canvas/CanvasBoard';
 import { GlassNavbar } from '../components/layout/GlassNavbar';
 import { Sidebar } from '../components/layout/Sidebar';
-import { FloatingToolbar } from '../components/layout/FloatingToolbar';
+import { ContextMenu } from '../components/canvas/ContextMenu';
+import { Minimap } from '../components/canvas/Minimap';
 import { useCanvasStore } from '../store/useCanvasStore';
 import { useExecutionStore } from '../store/useExecutionStore';
 
@@ -13,9 +14,8 @@ const VIDEO_URL =
 export const Workspace = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { saveStatus, theme, loadProject, currentProjectTitle } = useCanvasStore();
+  const { theme, loadProject, currentProjectTitle, isIsolated, setIsIsolated } = useCanvasStore();
   const { status } = useExecutionStore();
-  const [isIsolated, setIsIsolated] = useState(false);
 
   useEffect(() => {
     document.body.setAttribute('data-theme', 'dark');
@@ -58,41 +58,12 @@ export const Workspace = () => {
       {/* ── Canvas Layer ── */}
       <div className="workspace-cinematic__content">
         {!isIsolated && <GlassNavbar />}
-        {!isIsolated && <Sidebar />}
+        <Sidebar />
 
         <CanvasBoard />
 
-        {!isIsolated && <FloatingToolbar />}
-
-        {/* Zen Mode Toggle */}
-        <button
-          onClick={() => setIsIsolated(!isIsolated)}
-          className="workspace-cinematic__zen liquid-glass"
-          style={{
-            top: isIsolated ? '1.5rem' : '5.5rem',
-          }}
-        >
-          {isIsolated ? '← Exit Zen' : 'Zen Mode →'}
-        </button>
-
-        {/* Save Status */}
-        {!isIsolated && (
-          <div
-            className="workspace-cinematic__save liquid-glass"
-            onClick={() => navigate('/dashboard')}
-          >
-            <div
-              className="workspace-cinematic__save-dot"
-              style={{
-                backgroundColor: saveStatus === 'saving' ? '#eab308' : '#22c55e',
-                animation: saveStatus === 'saving' ? 'pulse 1s infinite' : 'none',
-              }}
-            />
-            <span className="workspace-cinematic__save-text">
-              {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
-            </span>
-          </div>
-        )}
+        {!isIsolated && <ContextMenu />}
+        {!isIsolated && <Minimap />}
       </div>
     </div>
   );

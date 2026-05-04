@@ -11,6 +11,7 @@ export const useCanvasStore = create((set, get) => ({
   theme: localStorage.getItem('app_theme') || 'dark',
   activeTool: 'select', // 'select', 'pan', 'comment', 'connect'
   connectingFrom: null, // Holds the node id when a connection line is started
+  isIsolated: false, // Zen Mode toggle
 
   currentProjectId: null,
   currentProjectTitle: '',
@@ -34,6 +35,7 @@ export const useCanvasStore = create((set, get) => ({
     localStorage.setItem('app_theme', newTheme);
     return { theme: newTheme };
   }),
+  setIsIsolated: (val) => set({ isIsolated: val }),
   setActiveTool: (tool) => set({ activeTool: tool, connectingFrom: null }),
   setConnectingFrom: (id) => set({ connectingFrom: id }),
 
@@ -130,6 +132,33 @@ export const useCanvasStore = create((set, get) => ({
 
   setPan: (x, y) => set({ pan: { x, y } }),
   setZoom: (zoom) => set({ zoom: Math.min(Math.max(zoom, 0.1), 3) }),
+
+  organizeChaos: () => {
+    const { nodes } = get();
+    const grouped = {};
+    nodes.forEach(n => {
+      if (!grouped[n.type]) grouped[n.type] = [];
+      grouped[n.type].push(n);
+    });
+
+    const newNodes = [...nodes];
+    let startX = 100;
+    
+    Object.keys(grouped).forEach((type) => {
+      let startY = 100;
+      grouped[type].forEach((node) => {
+        const index = newNodes.findIndex(n => n.id === node.id);
+        if (index !== -1) {
+          newNodes[index] = { ...node, x: startX, y: startY };
+          startY += (node.height || 400) + 100;
+        }
+      });
+      startX += 500;
+    });
+
+    set({ nodes: newNodes, saveStatus: 'saving' });
+    get().triggerAutoSave();
+  },
 
   // BACKEND LOGIC
   loadAllProjects: async () => {

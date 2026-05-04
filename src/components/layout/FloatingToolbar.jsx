@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useExecutionStore } from '../../store/useExecutionStore';
-import { MousePointer2, Hand, MessageSquarePlus, ZoomIn, ZoomOut, Unlink, Play, Pause, Square, FastForward, Timer, Trash2, Volume2, VolumeX } from 'lucide-react';
+import { MousePointer2, Hand, MessageSquarePlus, ZoomIn, ZoomOut, Unlink, Play, Pause, Square, FastForward, Timer, Trash2, Volume2, VolumeX, Wand2 } from 'lucide-react';
 import clsx from 'clsx';
 
 const formatTime = (totalSeconds) => {
@@ -11,7 +11,7 @@ const formatTime = (totalSeconds) => {
 };
 
 export const FloatingToolbar = () => {
-  const { zoom, setZoom, activeTool, setActiveTool, setConnectingFrom, connectingFrom, nodes, edges, clearCanvas } = useCanvasStore();
+  const { zoom, setZoom, activeTool, setActiveTool, setConnectingFrom, connectingFrom, nodes, edges, clearCanvas, organizeChaos } = useCanvasStore();
   const { status, timeRemaining, start, pause, resume, stop, skip, activeElementId } = useExecutionStore();
 
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -135,6 +135,15 @@ export const FloatingToolbar = () => {
         onClick={clearCanvas}
       >
         <Trash2 size={16} />
+      </button>
+
+      {/* ── Auto Layout ── */}
+      <button 
+        className="w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-purple-500/20 text-purple-500"
+        title="Organize Chaos (Auto-Layout)"
+        onClick={organizeChaos}
+      >
+        <Wand2 size={16} />
       </button>
 
       <div className="w-px h-6 mx-2" style={{ backgroundColor: 'var(--ghost-border)' }} />
