@@ -51,9 +51,6 @@ export const GlassNavbar = () => {
     }
   };
 
-  const isRunning = status === 'running';
-  const isActive = status !== 'idle' && status !== 'completed';
-
   return (
     <nav className={clsx(
       "glass-panel fixed top-4 left-1/2 -translate-x-1/2 h-14 px-4 flex items-center gap-4 z-50 rounded-full transition-all duration-500 overflow-hidden group shadow-2xl border",
