@@ -15,6 +15,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/canvas/:id" element={<Workspace />} />
         <Route path="/schedule/:id" element={<Schedule />} />
+        <Route path="/schedule" element={<Schedule />} />
       </Routes>
     </BrowserRouter>
   );

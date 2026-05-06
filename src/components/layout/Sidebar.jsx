@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
-import { Square, Circle, FileText, Layers, Settings, Library, StickyNote, Image, Code, ArrowRight, Sparkles } from 'lucide-react';
+import { Square, Circle, FileText, Layers, Settings, Library, StickyNote, Image, Code, ArrowRight, Sparkles, ChevronRight } from 'lucide-react';
 
 export const Sidebar = () => {
   const addNode = useCanvasStore(state => state.addNode);
@@ -152,7 +152,17 @@ export const Sidebar = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-8 h-full z-50 group peer" />
+      <div className="fixed top-0 left-0 w-12 h-full z-50 group peer flex items-center pl-2 cursor-pointer">
+        <div 
+          className="w-8 h-8 rounded-md flex items-center justify-center shadow-2xl transition-all group-hover:scale-105" 
+          style={{ 
+            backgroundColor: 'var(--surface-high)', 
+            border: '1px solid var(--ghost-border)' 
+          }}
+        >
+          <ChevronRight size={18} style={{ color: 'var(--text-main)' }} className="opacity-50 group-hover:opacity-100 transition-opacity" />
+        </div>
+      </div>
       <aside className="glass-panel fixed top-24 left-4 w-64 bottom-4 flex flex-col z-40 overflow-hidden transition-transform duration-500 -translate-x-[120%] hover:translate-x-0 peer-hover:translate-x-0 shadow-2xl">
       <div className="flex border-b" style={{ borderColor: 'var(--ghost-border)' }}>
         <TabButton icon={<Layers size={18} />} title="Components" active={activeTab === 'components'} onClick={() => setActiveTab('components')} />

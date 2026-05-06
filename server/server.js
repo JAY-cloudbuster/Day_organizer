@@ -194,6 +194,17 @@ app.put('/api/projects/:id', authenticateToken, (req, res) => {
   });
 });
 
+// 7. DELETE PROJECT
+app.delete('/api/projects/:id', authenticateToken, (req, res) => {
+  db.run("DELETE FROM projects WHERE id = ? AND user_id = ?",
+    [req.params.id, req.user.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: "Failed to delete project" });
+      res.json({ message: "Project deleted." });
+    }
+  );
+});
+
 // ================= SCHEDULE ROUTES ================= //
 
 // CREATE SCHEDULE

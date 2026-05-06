@@ -1,78 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useScheduleStore, SCHEDULE_TEMPLATES } from '../store/useScheduleStore';
+import { useNavigate } from 'react-router-dom';
 import { useCanvasStore } from '../store/useCanvasStore';
-import { ArrowLeft, Clock, FileText, StopCircle, X, LayoutGrid } from 'lucide-react';
-import { ScheduleBoard } from '../components/schedule/ScheduleBoard';
+import { ArrowLeft, ChevronLeft, ChevronRight, Plus, Settings, Search } from 'lucide-react';
+import CalendarMonth from '../components/schedule/CalendarMonth';
+import CalendarWeek from '../components/schedule/CalendarWeek';
+import CalendarDay from '../components/schedule/CalendarDay';
+import EventModal from '../components/schedule/EventModal';
 
 const VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4';
 
 export const Schedule = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
   const { theme } = useCanvasStore();
-  const {
-    loadSchedule,
-    currentScheduleTitle,
-    updateTitle,
-    saveStatus,
-    resetSchedule,
-    blocks,
-    applyTemplate,
-    activeTimerBlockId,
-    clearTimer,
-    schedulesList,
-    loadAllSchedules,
-    loadComparisonSchedule,
-    showComparison,
-    closeComparison,
-    comparisonBlocks,
-    comparisonTitle
-  } = useScheduleStore();
-
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [showCompareMenu, setShowCompareMenu] = useState(false);
-  const [timerSeconds, setTimerSeconds] = useState(0);
+  
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [viewMode, setViewMode] = useState('month'); // 'month', 'week', 'day'
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
     document.body.setAttribute('data-theme', 'dark');
+    // Load events from localStorage
+    const saved = localStorage.getItem('calendar_events');
+    if (saved) setEvents(JSON.parse(saved));
   }, []);
 
-  useEffect(() => {
-    if (id) {
-      loadSchedule(id);
-      loadAllSchedules();
-    }
-    return () => resetSchedule();
-  }, [id, loadSchedule, resetSchedule, loadAllSchedules]);
-
-  // Focus Timer Logic
-  useEffect(() => {
-    let interval = null;
-    if (activeTimerBlockId) {
-      setTimerSeconds(0);
-      interval = setInterval(() => {
-        setTimerSeconds(s => s + 1);
-      }, 1000);
-    } else {
-      setTimerSeconds(0);
-    }
-    return () => clearInterval(interval);
-  }, [activeTimerBlockId]);
-
-  const activeTimerBlock = blocks.find(b => b.id === activeTimerBlockId);
-
-  const formatTimer = (s) => {
-    const m = Math.floor(s / 60);
-    const secs = s % 60;
-    return `${m}:${secs < 10 ? '0' : ''}${secs}`;
+  const handleAddEvent = (event) => {
+    // Format date as YYYY-MM-DD for consistent storage
+    const eventDate = event.date instanceof Date ? event.date : new Date(event.date);
+    const dateStr = eventDate.toLocaleDateString('en-CA'); // Returns YYYY-MM-DD format
+    const timeStr = `${String(eventDate.getHours()).padStart(2, '0')}:${String(eventDate.getMinutes()).padStart(2, '0')}`;
+    const fullDateString = `${dateStr}T${timeStr}`;
+    
+    const newEvent = {
+      ...event,
+      id: Date.now().toString(),
+      date: fullDateString
+    };
+    
+    const newEvents = [...events, newEvent];
+    setEvents(newEvents);
+    localStorage.setItem('calendar_events', JSON.stringify(newEvents));
+    setShowEventModal(false);
   };
 
-  const filledBlocks = blocks.filter(b => !b.hidden && b.text.trim().length > 0).length;
-  const visibleBlocks = blocks.filter(b => !b.hidden).length;
-  const progress = visibleBlocks > 0 ? (filledBlocks / visibleBlocks) * 100 : 0;
-  const isComplete = filledBlocks === visibleBlocks && visibleBlocks > 0;
+  const handleDeleteEvent = (eventId) => {
+    const newEvents = events.filter(e => e.id !== eventId);
+    setEvents(newEvents);
+    localStorage.setItem('calendar_events', JSON.stringify(newEvents));
+  };
+
+  const handlePrevious = () => {
+    const newDate = new Date(currentDate);
+    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() - 1);
+    else if (viewMode === 'week') newDate.setDate(newDate.getDate() - 7);
+    else newDate.setDate(newDate.getDate() - 1);
+    setCurrentDate(newDate);
+  };
+
+  const handleNext = () => {
+    const newDate = new Date(currentDate);
+    if (viewMode === 'month') newDate.setMonth(newDate.getMonth() + 1);
+    else if (viewMode === 'week') newDate.setDate(newDate.getDate() + 7);
+    else newDate.setDate(newDate.getDate() + 1);
+    setCurrentDate(newDate);
+  };
+
+  const handleToday = () => {
+    setCurrentDate(new Date());
+  };
 
   return (
     <div className="landing-page">
@@ -80,126 +78,81 @@ export const Schedule = () => {
       <video className="landing-video-bg" src={VIDEO_URL} autoPlay loop muted playsInline />
       <div className="landing-blur-overlay" />
 
-      {/* ── Schedule Wrapper ── */}
-      <div className={`sched-cinematic ${showComparison ? 'sched-cinematic--comparing' : ''}`}>
-
-        {/* ── Top Navbar ── */}
-        <nav className="sched-cinematic__topbar liquid-glass">
-          <div className="sched-cinematic__left">
-            <button className="sched-cinematic__back" onClick={() => navigate('/dashboard')} title="Back">
+      {/* ── Calendar Wrapper ── */}
+      <div className="calendar-container">
+        {/* ── Top Navigation Bar ── */}
+        <nav className="calendar-topbar liquid-glass">
+          <div className="calendar-topbar__left">
+            <button className="calendar-topbar__back" onClick={() => navigate('/dashboard')} title="Back to Dashboard">
               <ArrowLeft size={20} />
             </button>
-            <div className="sched-cinematic__divider" />
-            <div className="sched-cinematic__brand">
-              <div className="sched-cinematic__icon"><Clock size={16} /></div>
-              <input
-                className="sched-cinematic__title-input"
-                value={currentScheduleTitle || ''}
-                onChange={(e) => updateTitle(e.target.value)}
-                placeholder="Loading Schedule..."
-              />
+            <div className="calendar-topbar__divider" />
+            <h1 className="calendar-topbar__title">Calendar</h1>
+          </div>
+
+          <div className="calendar-topbar__center">
+            <button className="calendar-topbar__nav-btn" onClick={handlePrevious}>
+              <ChevronLeft size={20} />
+            </button>
+            <button className="calendar-topbar__today-btn" onClick={handleToday}>
+              Today
+            </button>
+            <button className="calendar-topbar__nav-btn" onClick={handleNext}>
+              <ChevronRight size={20} />
+            </button>
+            <div className="calendar-topbar__date-display">
+              {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </div>
           </div>
 
-          {/* Center: Progress */}
-          <div className="sched-cinematic__center">
-            <div className="sched-cinematic__progress" title={`${filledBlocks}/${visibleBlocks} Blocks Planned`}>
-              <div className="sched-cinematic__progress-bar" style={{ width: `${progress}%`, backgroundColor: isComplete ? '#22c55e' : 'rgba(255,255,255,0.6)' }} />
-              {isComplete && <div className="sched-cinematic__confetti">🎉 Fully Planned!</div>}
-            </div>
-          </div>
-
-          <div className="sched-cinematic__right">
-            {/* Templates */}
-            <div className="sched-cinematic__dropdown-wrap">
-              <button className="sched-cinematic__btn" onClick={() => setShowTemplates(!showTemplates)} title="Templates">
-                <FileText size={18} />
+          <div className="calendar-topbar__right">
+            <div className="calendar-topbar__view-switcher">
+              <button 
+                className={`calendar-view-btn ${viewMode === 'day' ? 'active' : ''}`}
+                onClick={() => setViewMode('day')}
+              >
+                Day
               </button>
-              {showTemplates && (
-                <div className="sched-cinematic__dropdown liquid-glass">
-                  <div className="sched-cinematic__dropdown-header">Quick Templates</div>
-                  {SCHEDULE_TEMPLATES.map(tpl => (
-                    <button key={tpl.id} className="sched-cinematic__dropdown-item" onClick={() => { applyTemplate(tpl.data); setShowTemplates(false); }}>
-                      <span className="sched-cinematic__dropdown-name">{tpl.name}</span>
-                      <span className="sched-cinematic__dropdown-desc">{tpl.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Compare */}
-            <div className="sched-cinematic__dropdown-wrap">
-              <button className="sched-cinematic__btn" onClick={() => setShowCompareMenu(!showCompareMenu)} title="Compare">
-                <LayoutGrid size={18} />
+              <button 
+                className={`calendar-view-btn ${viewMode === 'week' ? 'active' : ''}`}
+                onClick={() => setViewMode('week')}
+              >
+                Week
               </button>
-              {showCompareMenu && (
-                <div className="sched-cinematic__dropdown liquid-glass">
-                  <div className="sched-cinematic__dropdown-header">Compare With...</div>
-                  {schedulesList.filter(s => s.id !== id).map(s => (
-                    <button key={s.id} className="sched-cinematic__dropdown-item" onClick={() => { loadComparisonSchedule(s.id); setShowCompareMenu(false); }}>
-                      <span className="sched-cinematic__dropdown-name">{s.title}</span>
-                    </button>
-                  ))}
-                  {schedulesList.filter(s => s.id !== id).length === 0 && (
-                    <div className="sched-cinematic__dropdown-empty">No other schedules found.</div>
-                  )}
-                </div>
-              )}
+              <button 
+                className={`calendar-view-btn ${viewMode === 'month' ? 'active' : ''}`}
+                onClick={() => setViewMode('month')}
+              >
+                Month
+              </button>
             </div>
-
-            {/* Save Indicator */}
-            <div className="sched-cinematic__save">
-              <div className="sched-cinematic__save-dot" style={{ backgroundColor: saveStatus === 'saving' ? '#eab308' : '#22c55e', animation: saveStatus === 'saving' ? 'pulse 1s infinite' : 'none' }} />
-              <span className="sched-cinematic__save-text">{saveStatus === 'saving' ? 'Saving...' : 'Saved'}</span>
-            </div>
+            <button 
+              className="calendar-topbar__add-btn" 
+              onClick={() => {
+                setSelectedDate(currentDate);
+                setShowEventModal(true);
+              }}
+              title="Add Event"
+            >
+              <Plus size={20} />
+            </button>
           </div>
         </nav>
 
-        {/* ── Content ── */}
-        <div className="sched-cinematic__content">
-          <div className="sched-cinematic__main">
-            <ScheduleBoard isCompare={false} />
-          </div>
-
-          {showComparison && (
-            <div className="sched-cinematic__compare">
-              <div className="sched-cinematic__compare-header liquid-glass">
-                <span>{comparisonTitle}</span>
-                <button onClick={closeComparison}><X size={16} /></button>
-              </div>
-              <div className="schedule-board-wrapper" style={{ margin: 0, border: 'none', borderRadius: 0, borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
-                <div className="schedule-board" style={{ minWidth: '100%', minHeight: '100%' }}>
-                  <div className="schedule-board__grid" style={{ minWidth: '100%', minHeight: '100%' }} />
-                  {comparisonBlocks.filter(b => !b.hidden).map(b => (
-                    <div key={b.id} className="sched-block sched-block--readonly" style={{ left: b.x, top: b.y, backgroundColor: b.color || 'var(--surface-lowest)', minHeight: `${130 + ((b.spanHours||1) - 1) * 56}px` }}>
-                      <div className="sched-block__badge" style={{ backgroundColor: 'var(--accent-primary)' }}>{b.hour < 10 ? `0${b.hour}` : b.hour}</div>
-                      <div className="sched-block__header" style={{ paddingLeft: '12px', cursor: 'default' }}>
-                        <span className="sched-block__label" style={{ color: 'var(--text-main)' }}>{b.label} {b.spanHours > 1 && <span className="sched-block__span-pill">{b.spanHours}h</span>}</span>
-                      </div>
-                      <div className="sched-block__body">
-                        <div style={{ color: 'var(--text-main)', fontSize: '0.82rem', padding: '8px', opacity: 0.8 }}>{b.text || 'Empty'}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+        {/* ── Calendar Content ── */}
+        <div className="calendar-content">
+          {viewMode === 'month' && <CalendarMonth currentDate={currentDate} events={events} onSelectDate={(date) => { setSelectedDate(date); setShowEventModal(true); }} onDeleteEvent={handleDeleteEvent} />}
+          {viewMode === 'week' && <CalendarWeek currentDate={currentDate} events={events} onSelectDate={(date) => { setSelectedDate(date); setShowEventModal(true); }} onDeleteEvent={handleDeleteEvent} />}
+          {viewMode === 'day' && <CalendarDay currentDate={currentDate} events={events} onSelectDate={(date) => { setSelectedDate(date); setShowEventModal(true); }} onDeleteEvent={handleDeleteEvent} />}
         </div>
 
-        {/* Focus Timer Widget */}
-        {activeTimerBlockId && activeTimerBlock && (
-          <div className="sched-cinematic__timer liquid-glass">
-            <div className="sched-cinematic__timer-info">
-              <div className="sched-cinematic__timer-label">Focusing on:</div>
-              <div className="sched-cinematic__timer-task">{activeTimerBlock.text || 'Untitled Block'}</div>
-            </div>
-            <div className="sched-cinematic__timer-time">{formatTimer(timerSeconds)}</div>
-            <button className="sched-cinematic__timer-stop" onClick={clearTimer}>
-              <StopCircle size={24} color="#ef4444" />
-            </button>
-          </div>
+        {/* Event Modal */}
+        {showEventModal && (
+          <EventModal 
+            date={selectedDate}
+            onAdd={handleAddEvent}
+            onClose={() => setShowEventModal(false)}
+          />
         )}
       </div>
     </div>

@@ -7,6 +7,7 @@ import { ContextMenu } from '../components/canvas/ContextMenu';
 import { Minimap } from '../components/canvas/Minimap';
 import { useCanvasStore } from '../store/useCanvasStore';
 import { useExecutionStore } from '../store/useExecutionStore';
+import { Minimize } from 'lucide-react';
 
 const VIDEO_URL =
   'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260406_094145_4a271a6c-3869-4f1c-8aa7-aeb0cb227994.mp4';
@@ -64,6 +65,21 @@ export const Workspace = () => {
 
         {!isIsolated && <ContextMenu />}
         {!isIsolated && <Minimap />}
+
+        {isIsolated && (
+          <button
+            onClick={() => setIsIsolated(false)}
+            className="fixed top-6 right-6 z-50 p-3 rounded-full glass-panel shadow-2xl transition-all hover:scale-105 active:scale-95"
+            title="Exit Full Screen"
+            style={{ 
+              color: 'var(--text-main)', 
+              borderColor: 'var(--ghost-border)', 
+              backgroundColor: 'var(--surface-high)' 
+            }}
+          >
+            <Minimize size={20} />
+          </button>
+        )}
       </div>
     </div>
   );
