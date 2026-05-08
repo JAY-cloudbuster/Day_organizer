@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
-import { Square, Circle, FileText, Layers, Settings, Library, StickyNote, Image, Code, ArrowRight, Sparkles, ChevronRight } from 'lucide-react';
+import { Square, Circle, FileText, Layers, Settings, Library, StickyNote, Image, Code, ArrowRight, Sparkles, ChevronRight, Target, Clock, Link2 } from 'lucide-react';
 
 export const Sidebar = () => {
   const addNode = useCanvasStore(state => state.addNode);
   const pan = useCanvasStore(state => state.pan);
   const zoom = useCanvasStore(state => state.zoom);
+  const fontStyle = useCanvasStore(state => state.fontStyle);
+  const textSize = useCanvasStore(state => state.textSize);
+  const arrowStyle = useCanvasStore(state => state.arrowStyle);
+  const updateSettings = useCanvasStore(state => state.updateSettings);
   const [activeTab, setActiveTab] = useState('components');
   const [defaultColor, setDefaultColor] = useState('var(--surface-lowest)');
   
@@ -111,6 +115,9 @@ export const Sidebar = () => {
     else if (type === 'sticky') content = { title: 'Note', text: '' };
     else if (type === 'image') content = { url: '', caption: 'New Image' };
     else if (type === 'code') content = { code: '', language: 'js' };
+    else if (type === 'goaltracker') content = { title: 'Master Plan', goals: [{ text: 'First milestone', done: false }] };
+    else if (type === 'timer') content = { title: 'Deep Work', initialTime: 25 * 60, timeRemaining: 25 * 60, isRunning: false };
+    else if (type === 'link') content = { title: 'Useful Resource', url: '', description: 'Click to open external link' };
 
     state.addNode({ type, x: targetX, y: targetY, content, color: defaultColor });
   };
@@ -223,6 +230,13 @@ export const Sidebar = () => {
             
             <div className="w-full h-px my-2 opacity-20" style={{ backgroundColor: 'var(--ghost-border)' }} />
             
+            <div className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Advanced Tools</div>
+            <ComponentDraggable name="Goal Tracker" desc="Animated progress" icon={<Target />} onClick={() => insertNode('goaltracker')} />
+            <ComponentDraggable name="Local Timer" desc="Pomodoro countdown" icon={<Clock />} onClick={() => insertNode('timer')} />
+            <ComponentDraggable name="Smart Link" desc="External resources" icon={<Link2 />} onClick={() => insertNode('link')} />
+
+            <div className="w-full h-px my-2 opacity-20" style={{ backgroundColor: 'var(--ghost-border)' }} />
+
             <ComponentDraggable name="Flow Arrow" desc="Link nodes together" icon={<ArrowRight />} onClick={() => useCanvasStore.getState().setActiveTool('connect')} />
           </>
         )}
@@ -259,10 +273,62 @@ export const Sidebar = () => {
         )}
 
         {activeTab === 'settings' && (
-          <div className="flex flex-col mt-4 text-sm" style={{ color: 'var(--text-muted)' }}>
-            <span className="font-bold text-xs uppercase mb-2">Workspace Info</span>
-            <span>Local DB connected.</span>
-            <span>Security: Active</span>
+          <div className="flex flex-col mt-4 text-sm gap-4" style={{ color: 'var(--text-muted)' }}>
+            <div>
+              <span className="font-bold text-xs uppercase mb-2 block">Workspace Info</span>
+              <div className="text-xs mb-1">Local DB connected.</div>
+              <div className="text-xs">Security: Active</div>
+            </div>
+
+            <div className="w-full h-px opacity-20" style={{ backgroundColor: 'var(--ghost-border)' }} />
+
+            <div>
+              <span className="font-bold text-xs uppercase mb-2 block">Appearance</span>
+              
+              <div className="flex flex-col gap-3">
+                <div>
+                  <label className="text-[10px] uppercase mb-1 block">Font Style</label>
+                  <select 
+                    value={fontStyle} 
+                    onChange={e => updateSettings({ fontStyle: e.target.value })}
+                    className="w-full text-xs p-2 rounded bg-black/5 dark:bg-white/5 border outline-none"
+                    style={{ borderColor: 'var(--ghost-border)', color: 'var(--text-main)' }}
+                  >
+                    <option value="sans-serif">System Default</option>
+                    <option value="'Inter', sans-serif">Inter</option>
+                    <option value="'Roboto', sans-serif">Roboto</option>
+                    <option value="monospace">Monospace</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase mb-1 block">Text Size</label>
+                  <select 
+                    value={textSize} 
+                    onChange={e => updateSettings({ textSize: e.target.value })}
+                    className="w-full text-xs p-2 rounded bg-black/5 dark:bg-white/5 border outline-none"
+                    style={{ borderColor: 'var(--ghost-border)', color: 'var(--text-main)' }}
+                  >
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase mb-1 block">Arrow Style</label>
+                  <select 
+                    value={arrowStyle} 
+                    onChange={e => updateSettings({ arrowStyle: e.target.value })}
+                    className="w-full text-xs p-2 rounded bg-black/5 dark:bg-white/5 border outline-none"
+                    style={{ borderColor: 'var(--ghost-border)', color: 'var(--text-main)' }}
+                  >
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>
