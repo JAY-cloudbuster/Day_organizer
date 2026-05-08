@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { Square, Circle, FileText, Layers, Settings, Library, StickyNote, Image, Code, ArrowRight, Sparkles, ChevronRight } from 'lucide-react';
 
@@ -8,6 +8,24 @@ export const Sidebar = () => {
   const zoom = useCanvasStore(state => state.zoom);
   const [activeTab, setActiveTab] = useState('components');
   const [defaultColor, setDefaultColor] = useState('var(--surface-lowest)');
+  
+  const [isOpen, setIsOpen] = useState(false);
+  const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const insertNode = (type) => {
     const state = useCanvasStore.getState();
@@ -152,19 +170,30 @@ export const Sidebar = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-12 h-full z-50 group peer flex items-center pl-2 cursor-pointer">
-        <div 
-          className="w-8 h-8 rounded-md flex items-center justify-center shadow-2xl transition-all group-hover:scale-105" 
-          style={{ 
-            backgroundColor: 'var(--surface-high)', 
-            border: '1px solid var(--ghost-border)' 
-          }}
-        >
-          <ChevronRight size={18} style={{ color: 'var(--text-main)' }} className="opacity-50 group-hover:opacity-100 transition-opacity" />
-        </div>
+      <aside 
+        ref={sidebarRef}
+        onClick={(e) => {
+          if (!isOpen) {
+            setIsOpen(true);
+          }
+        }}
+        className={`glass-panel fixed top-24 left-0 w-64 bottom-4 flex flex-col z-40 overflow-hidden transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] shadow-2xl rounded-l-none ${isOpen ? 'translate-x-0' : '-translate-x-[calc(100%-48px)]'}`}
+        style={{ cursor: isOpen ? 'default' : 'pointer' }}
+      >
+      {/* Handle / Peeking Area Indicator */}
+      <div 
+        className="absolute right-0 top-0 bottom-0 w-12 flex flex-col items-center justify-center border-l transition-opacity duration-300 z-50 glass-panel rounded-none border-y-0 border-r-0"
+        style={{ 
+          borderColor: 'var(--ghost-border)',
+          opacity: isOpen ? 0 : 1,
+          pointerEvents: isOpen ? 'none' : 'auto'
+        }}
+      >
+        <div className="w-1 h-8 rounded-full mb-2 opacity-50" style={{ backgroundColor: 'var(--text-muted)' }}></div>
+        <ChevronRight size={20} style={{ color: 'var(--text-main)' }} />
       </div>
-      <aside className="glass-panel fixed top-24 left-4 w-64 bottom-4 flex flex-col z-40 overflow-hidden transition-transform duration-500 -translate-x-[120%] hover:translate-x-0 peer-hover:translate-x-0 shadow-2xl">
-      <div className="flex border-b" style={{ borderColor: 'var(--ghost-border)' }}>
+
+      <div className="flex border-b relative" style={{ borderColor: 'var(--ghost-border)' }}>
         <TabButton icon={<Layers size={18} />} title="Components" active={activeTab === 'components'} onClick={() => setActiveTab('components')} />
         <TabButton icon={<Library size={18} />} title="Library" active={activeTab === 'library'} onClick={() => setActiveTab('library')} />
         <TabButton icon={<Settings size={18} />} title="Settings" active={activeTab === 'settings'} onClick={() => setActiveTab('settings')} />
