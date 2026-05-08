@@ -5,6 +5,7 @@ import { Auth } from './pages/Auth';
 import { Dashboard } from './pages/Dashboard';
 import { Workspace } from './pages/Workspace';
 import { Schedule } from './pages/Schedule';
+import { GlobalModal } from './components/layout/GlobalModal';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/schedule/:id" element={<Schedule />} />
         <Route path="/schedule" element={<Schedule />} />
       </Routes>
+      <GlobalModal />
     </BrowserRouter>
   );
 }
