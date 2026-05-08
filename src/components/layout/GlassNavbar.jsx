@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useCanvasStore } from '../../store/useCanvasStore';
 import { useExecutionStore } from '../../store/useExecutionStore';
-import { Moon, Sun, History, Share2, Loader2, Play, Pause, Square, FastForward, Maximize, Minimize, Volume2, VolumeX } from 'lucide-react';
+import { Moon, Sun, History, Share2, Loader2, Play, Pause, Square, FastForward, Maximize, Minimize, Volume2, VolumeX, Home, Trash2, PenTool } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toPng } from 'html-to-image';
 import { toggleBrownNoise } from '../../utils/haptics';
@@ -15,7 +15,7 @@ const formatTime = (totalSeconds) => {
 
 export const GlassNavbar = () => {
   const { id } = useParams();
-  const { theme, toggleTheme, currentProjectTitle, saveStatus, isIsolated, setIsIsolated } = useCanvasStore();
+  const { theme, toggleTheme, currentProjectTitle, saveStatus, isIsolated, setIsIsolated, clearCanvas, activeTool, setActiveTool } = useCanvasStore();
   const { status, timeRemaining, start, pause, resume, stop, skip, activeElementId } = useExecutionStore();
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
@@ -54,7 +54,7 @@ export const GlassNavbar = () => {
   return (
     <nav className={clsx(
       "glass-panel fixed top-4 left-1/2 -translate-x-1/2 h-14 px-4 flex items-center gap-4 z-50 rounded-full transition-all duration-500 overflow-hidden group shadow-2xl border",
-      isActive ? "w-[400px]" : "w-[120px] hover:w-[450px]"
+      isActive ? "w-[400px]" : "w-[120px] hover:w-[540px]"
     )} style={{ borderColor: 'var(--ghost-border)', backgroundColor: 'var(--surface-high)' }}>
       
       {/* ── Save Status Dot (Always visible) ── */}
@@ -109,11 +109,30 @@ export const GlassNavbar = () => {
         <button onClick={() => setAudioEnabled(!audioEnabled)} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors" title="Focus Audio" style={{ color: audioEnabled ? 'var(--accent-primary)' : 'var(--text-muted)' }}>
           {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
         </button>
+        <div className="w-px h-4 mx-1 opacity-30" style={{ backgroundColor: 'var(--ghost-border)' }} />
         <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors" title="Toggle Theme" style={{ color: 'var(--text-muted)' }}>
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
         </button>
         <button onClick={() => setIsIsolated(!isIsolated)} className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors" title="Zen Mode" style={{ color: 'var(--text-muted)' }}>
           {isIsolated ? <Minimize size={16} /> : <Maximize size={16} />}
+        </button>
+        <div className="w-px h-4 mx-1 opacity-30" style={{ backgroundColor: 'var(--ghost-border)' }} />
+        <button 
+          onClick={() => setActiveTool(activeTool === 'draw' ? 'select' : 'draw')} 
+          className="p-2 rounded-full transition-colors" 
+          title="Freehand Draw" 
+          style={{ 
+            color: activeTool === 'draw' ? 'var(--accent-primary)' : 'var(--text-muted)',
+            backgroundColor: activeTool === 'draw' ? 'rgba(0,0,0,0.05)' : 'transparent'
+          }}
+        >
+          <PenTool size={16} />
+        </button>
+        <button onClick={() => navigate('/dashboard')} className="p-2 rounded-full hover:bg-blue-500/10 transition-colors text-blue-500" title="Home">
+          <Home size={16} />
+        </button>
+        <button onClick={clearCanvas} className="p-2 rounded-full hover:bg-red-500/10 transition-colors text-red-500" title="Clear Canvas">
+          <Trash2 size={16} />
         </button>
       </div>
 
