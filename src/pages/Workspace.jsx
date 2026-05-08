@@ -5,6 +5,7 @@ import { GlassNavbar } from '../components/layout/GlassNavbar';
 import { Sidebar } from '../components/layout/Sidebar';
 import { ContextMenu } from '../components/canvas/ContextMenu';
 import { Minimap } from '../components/canvas/Minimap';
+import { GlobalModal } from '../components/layout/GlobalModal';
 import { useCanvasStore } from '../store/useCanvasStore';
 import { useExecutionStore } from '../store/useExecutionStore';
 import { Minimize } from 'lucide-react';
@@ -19,7 +20,7 @@ export const Workspace = () => {
   const { status } = useExecutionStore();
 
   useEffect(() => {
-    document.body.setAttribute('data-theme', 'dark');
+    document.body.setAttribute('data-theme', theme);
 
     const handleMouseMove = (e) => {
       document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
@@ -31,7 +32,7 @@ export const Workspace = () => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     if (id) {
@@ -58,6 +59,7 @@ export const Workspace = () => {
 
       {/* ── Canvas Layer ── */}
       <div className="workspace-cinematic__content">
+        <GlobalModal />
         {!isIsolated && <GlassNavbar />}
         <Sidebar />
 
