@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useCanvasStore } from './useCanvasStore';
+import { useModalStore } from './useModalStore';
 
 export const parseTime = (timeStr) => {
   if (!timeStr) return 0;
@@ -26,6 +27,25 @@ export const useExecutionStore = create((set, get) => ({
     
     if (nodes.length === 0) return;
 
+    if (nodes.length > 1) {
+      const unconnectedNodes = nodes.filter(n => !edges.some(e => e.from === n.id || e.to === n.id));
+      if (unconnectedNodes.length > 0) {
+        useModalStore.getState().openModal({
+          type: 'warning',
+          title: 'Unconnected Nodes Detected',
+          message: `There ${unconnectedNodes.length === 1 ? 'is 1 node' : `are ${unconnectedNodes.length} nodes`} not connected to the main flow. Are you sure you want to start execution?`,
+          onConfirm: () => {
+            get()._executeStart(nodes, edges);
+          }
+        });
+        return;
+      }
+    }
+
+    get()._executeStart(nodes, edges);
+  },
+
+  _executeStart: (nodes, edges) => {
     // Find starting node (node with no incoming edges)
     const nodesWithIncoming = new Set(edges.map(e => e.to));
     let startNode = nodes.find(n => !nodesWithIncoming.has(n.id));
