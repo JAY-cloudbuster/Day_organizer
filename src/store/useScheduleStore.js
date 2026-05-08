@@ -69,7 +69,7 @@ export const useScheduleStore = create((set, get) => ({
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const res = await fetch(`${API_URL}/api/schedules`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API_URL}/api/schedules?t=${Date.now()}`, { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (data.schedules) set({ schedulesList: data.schedules });
     } catch (e) { console.error(e); }
@@ -84,10 +84,21 @@ export const useScheduleStore = create((set, get) => ({
         method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ title: title || 'My Schedule', stateData }),
       });
+      if (!res.ok) throw new Error("Database rejected creation");
       const data = await res.json();
+      set(state => ({
+        schedulesList: [{ id: data.id, title: data.title, updated_at: new Date().toISOString() }, ...state.schedulesList]
+      }));
       get().loadAllSchedules();
       if (nav) nav(`/schedule/${data.id}`);
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e); 
+      useModalStore.getState().openModal({
+        title: 'Creation Failed',
+        message: 'Could not create schedule. If using OneDrive, please ensure your database file is not locked or syncing.',
+        type: 'warning'
+      });
+    }
   },
 
   loadSchedule: async (id) => {
@@ -109,10 +120,23 @@ export const useScheduleStore = create((set, get) => ({
   deleteSchedule: async (id) => {
     const token = localStorage.getItem('token');
     if (!token) return;
+    
+    const prevSchedules = get().schedulesList;
+    set(state => ({ schedulesList: state.schedulesList.filter(s => s.id !== id) }));
+    
     try {
-      await fetch(`${API_URL}/api/schedules/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`${API_URL}/api/schedules/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error("Database rejected deletion");
       get().loadAllSchedules();
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+      console.error(e); 
+      set({ schedulesList: prevSchedules });
+      useModalStore.getState().openModal({
+        title: 'Deletion Failed',
+        message: 'Could not delete schedule. Database might be locked or busy.',
+        type: 'warning'
+      });
+    }
   },
 
   updateBlockText: (id, text) => {
