@@ -18,6 +18,7 @@ export const Dashboard = () => {
   const [showAccount, setShowAccount] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [actionModal, setActionModal] = useState(null);
 
   // Schedule Store
   const { schedulesList, loadAllSchedules, createSchedule, deleteSchedule } = useScheduleStore();
@@ -30,27 +31,53 @@ export const Dashboard = () => {
   }, []);
 
   const handleCreateSchedule = () => {
-    const title = prompt('Enter schedule name:', 'My Daily Schedule');
-    if (title) createSchedule(title, navigate);
+    setActionModal({
+      type: 'prompt',
+      title: 'New Schedule',
+      placeholder: 'My Daily Schedule',
+      onConfirm: (title) => {
+        if (title) createSchedule(title, navigate);
+        setActionModal(null);
+      }
+    });
   };
 
   const handleDeleteSchedule = (e, id) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this schedule permanently?')) {
-      deleteSchedule(id);
-    }
+    setActionModal({
+      type: 'confirm',
+      title: 'Delete Schedule?',
+      desc: 'Are you sure you want to delete this schedule permanently? This action cannot be undone.',
+      onConfirm: () => {
+        deleteSchedule(id);
+        setActionModal(null);
+      }
+    });
   };
 
   const handleCreate = () => {
-    const title = prompt("Enter project name:", "My Master Plan");
-    if (title) createProject(title, navigate);
+    setActionModal({
+      type: 'prompt',
+      title: 'New Canvas',
+      placeholder: 'My Master Plan',
+      onConfirm: (title) => {
+        if (title) createProject(title, navigate);
+        setActionModal(null);
+      }
+    });
   };
 
   const handleDelete = (e, id) => {
     e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this canvas permanently?")) {
-      deleteProject(id);
-    }
+    setActionModal({
+      type: 'confirm',
+      title: 'Delete Canvas?',
+      desc: 'Are you sure you want to delete this canvas permanently? This action cannot be undone.',
+      onConfirm: () => {
+        deleteProject(id);
+        setActionModal(null);
+      }
+    });
   };
 
   const handleLogout = () => {
@@ -128,105 +155,130 @@ export const Dashboard = () => {
           {/* Scrollable Content Area */}
           <div className="dash-scroll">
 
-            {/* ── Canvas Section ── */}
-            <div className="dash-section animate-blur-fade-up" style={fadeStyle(200)}>
-              <h2 className="dash-section__title">
-                <Grip size={20} style={{ opacity: 0.6 }} />
-                Canvases
-              </h2>
-            </div>
-
-            <div className="dash-grid animate-blur-fade-up" style={fadeStyle(300)}>
-              {/* Create New Canvas */}
-              <div className="dash-card dash-card--create liquid-glass" onClick={handleCreate}>
-                <div className="dash-card__create-icon">
-                  <Plus size={32} />
+            <div className="flex flex-col gap-10">
+              
+              {/* ── Canvas Ecosystem Hub ── */}
+              <div 
+                className="liquid-glass animate-blur-fade-up flex flex-col gap-6" 
+                style={{ padding: '2rem', borderRadius: '40px', ...fadeStyle(200) }}
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-black tracking-tight flex items-center gap-3" style={{ color: 'var(--text-main)' }}>
+                    <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+                      <Grip size={24} />
+                    </div>
+                    Canvas Ecosystem
+                  </h2>
+                  <div className="px-4 py-1.5 rounded-full text-xs font-bold bg-blue-500/10 text-blue-500">
+                    {filteredProjects.length} Workspaces
+                  </div>
                 </div>
-                <div className="dash-card__create-title">New Canvas</div>
-                <div className="dash-card__create-sub">Initialize a blank environment</div>
+
+                <div className="dash-grid">
+                  {/* Create New Canvas */}
+                  <div className="dash-card dash-card--create liquid-glass" onClick={handleCreate}>
+                    <div className="dash-card__create-icon">
+                      <Plus size={32} />
+                    </div>
+                    <div className="dash-card__create-title">New Canvas</div>
+                    <div className="dash-card__create-sub">Initialize a blank environment</div>
+                  </div>
+
+                  {/* Project Cards */}
+                  {isFetching ? (
+                    <div className="dash-empty">Syncing Workspaces...</div>
+                  ) : filteredProjects.length === 0 ? (
+                    <div className="dash-empty" style={{ gridColumn: 'span 2' }}>No canvases found.</div>
+                  ) : (
+                    filteredProjects.map((file) => (
+                      <div
+                        key={file.id}
+                        className="dash-card liquid-glass"
+                        onClick={() => navigate(`/canvas/${file.id}`)}
+                      >
+                        <button
+                          onClick={(e) => handleDelete(e, file.id)}
+                          className="dash-card__delete"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <div className="dash-card__preview">
+                          <LayoutGrid size={56} style={{ opacity: 0.1 }} />
+                        </div>
+                        <div className="dash-card__info">
+                          <div className="dash-card__name">{file.title}</div>
+                          <div className="dash-card__date">
+                            {new Date(file.updated_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
 
-              {/* Create New Schedule */}
-              <div className="dash-card dash-card--create dash-card--schedule liquid-glass" onClick={handleCreateSchedule}>
-                <div className="dash-card__create-icon dash-card__create-icon--schedule">
-                  <CalendarClock size={32} />
+              {/* ── Schedule Ecosystem Hub ── */}
+              <div 
+                className="liquid-glass animate-blur-fade-up flex flex-col gap-6" 
+                style={{ padding: '2rem', borderRadius: '40px', ...fadeStyle(400) }}
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-black tracking-tight flex items-center gap-3" style={{ color: 'var(--text-main)' }}>
+                    <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500">
+                      <CalendarClock size={24} />
+                    </div>
+                    Schedule Ecosystem
+                  </h2>
+                  <div className="px-4 py-1.5 rounded-full text-xs font-bold bg-purple-500/10 text-purple-500">
+                    {filteredSchedules.length} Plans
+                  </div>
                 </div>
-                <div className="dash-card__create-title">New Schedule</div>
-                <div className="dash-card__create-sub">Plan your 24-hour day</div>
+
+                <div className="dash-grid">
+                  {/* Create New Schedule */}
+                  <div className="dash-card dash-card--create dash-card--schedule liquid-glass" onClick={handleCreateSchedule}>
+                    <div className="dash-card__create-icon dash-card__create-icon--schedule">
+                      <Plus size={32} />
+                    </div>
+                    <div className="dash-card__create-title">New Schedule</div>
+                    <div className="dash-card__create-sub">Plan your 24-hour day</div>
+                  </div>
+
+                  {/* Schedule Cards */}
+                  {isFetchingSchedules ? (
+                    <div className="dash-empty">Syncing Schedules...</div>
+                  ) : filteredSchedules.length === 0 ? (
+                    <div className="dash-empty" style={{ gridColumn: 'span 2' }}>No schedules yet. Create one!</div>
+                  ) : (
+                    filteredSchedules.map((sched) => (
+                      <div
+                        key={sched.id}
+                        className="dash-card liquid-glass"
+                        onClick={() => navigate(`/schedule/${sched.id}`)}
+                      >
+                        <button
+                          onClick={(e) => handleDeleteSchedule(e, sched.id)}
+                          className="dash-card__delete"
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                        <div className="dash-card__preview">
+                          <CalendarClock size={56} style={{ opacity: 0.1 }} />
+                        </div>
+                        <div className="dash-card__info">
+                          <div className="dash-card__name">{sched.title}</div>
+                          <div className="dash-card__date">
+                            {new Date(sched.updated_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
 
-              {/* Project Cards */}
-              {isFetching ? (
-                <div className="dash-empty">Syncing Workspaces...</div>
-              ) : filteredProjects.length === 0 ? (
-                <div className="dash-empty">No canvases found.</div>
-              ) : (
-                filteredProjects.map((file) => (
-                  <div
-                    key={file.id}
-                    className="dash-card liquid-glass"
-                    onClick={() => navigate(`/canvas/${file.id}`)}
-                  >
-                    <button
-                      onClick={(e) => handleDelete(e, file.id)}
-                      className="dash-card__delete"
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    <div className="dash-card__preview">
-                      <LayoutGrid size={56} style={{ opacity: 0.1 }} />
-                    </div>
-                    <div className="dash-card__info">
-                      <div className="dash-card__name">{file.title}</div>
-                      <div className="dash-card__date">
-                        {new Date(file.updated_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* ── Schedules Section ── */}
-            <div className="dash-section animate-blur-fade-up" style={fadeStyle(400)}>
-              <h2 className="dash-section__title">
-                <Clock size={20} style={{ opacity: 0.6 }} />
-                Schedules
-              </h2>
-            </div>
-
-            <div className="dash-grid animate-blur-fade-up" style={fadeStyle(500)}>
-              {isFetchingSchedules ? (
-                <div className="dash-empty">Syncing Schedules...</div>
-              ) : filteredSchedules.length === 0 ? (
-                <div className="dash-empty">No schedules yet. Create one above!</div>
-              ) : (
-                filteredSchedules.map((sched) => (
-                  <div
-                    key={sched.id}
-                    className="dash-card liquid-glass"
-                    onClick={() => navigate(`/schedule/${sched.id}`)}
-                  >
-                    <button
-                      onClick={(e) => handleDeleteSchedule(e, sched.id)}
-                      className="dash-card__delete"
-                      title="Delete"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    <div className="dash-card__preview">
-                      <CalendarClock size={56} style={{ opacity: 0.1 }} />
-                    </div>
-                    <div className="dash-card__info">
-                      <div className="dash-card__name">{sched.title}</div>
-                      <div className="dash-card__date">
-                        {new Date(sched.updated_at).toLocaleDateString()}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
             </div>
 
           </div>
@@ -234,6 +286,62 @@ export const Dashboard = () => {
       </div>
 
       {showAccount && <AccountModal onClose={() => setShowAccount(false)} />}
+
+      {/* ── Action Modal ── */}
+      {actionModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 transition-all" onClick={() => setActionModal(null)}>
+          <div 
+            className="liquid-glass w-full max-w-md p-8 rounded-[32px] flex flex-col gap-6 animate-in zoom-in-95 duration-300 shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-2xl font-black" style={{ color: 'var(--text-main)' }}>{actionModal.title}</h3>
+            
+            {actionModal.desc && (
+              <p className="text-sm font-semibold opacity-70" style={{ color: 'var(--text-muted)' }}>{actionModal.desc}</p>
+            )}
+
+            {actionModal.type === 'prompt' && (
+              <input 
+                autoFocus
+                type="text"
+                id="action-modal-input"
+                placeholder={actionModal.placeholder}
+                className="liquid-glass w-full p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-500/50 font-bold"
+                style={{ color: 'var(--text-main)' }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') actionModal.onConfirm(e.target.value);
+                  if (e.key === 'Escape') setActionModal(null);
+                }}
+              />
+            )}
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button 
+                onClick={() => setActionModal(null)}
+                className="px-6 py-3 rounded-xl font-bold transition-all hover:bg-black/10 dark:hover:bg-white/10"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  if (actionModal.type === 'prompt') {
+                    const val = document.getElementById('action-modal-input')?.value;
+                    actionModal.onConfirm(val);
+                  } else {
+                    actionModal.onConfirm();
+                  }
+                }}
+                className={`px-6 py-3 rounded-xl font-bold text-white transition-all shadow-lg hover:-translate-y-0.5 ${
+                  actionModal.type === 'confirm' ? "bg-red-500 hover:bg-red-600 shadow-red-500/20" : "bg-blue-500 hover:bg-blue-600 shadow-blue-500/20"
+                }`}
+              >
+                {actionModal.type === 'confirm' ? 'Delete' : 'Create'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
