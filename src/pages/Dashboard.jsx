@@ -36,7 +36,7 @@ export const Dashboard = () => {
       title: 'New Schedule',
       placeholder: 'My Daily Schedule',
       onConfirm: (title) => {
-        if (title) createSchedule(title, navigate);
+        createSchedule(title || 'My Daily Schedule', navigate);
         setActionModal(null);
       }
     });
@@ -61,7 +61,7 @@ export const Dashboard = () => {
       title: 'New Canvas',
       placeholder: 'My Master Plan',
       onConfirm: (title) => {
-        if (title) createProject(title, navigate);
+        createProject(title || 'My Master Plan', navigate);
         setActionModal(null);
       }
     });
