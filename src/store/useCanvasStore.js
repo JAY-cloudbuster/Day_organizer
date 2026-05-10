@@ -336,7 +336,7 @@ export const useCanvasStore = create((set, get) => ({
     set(state => ({ projectsList: state.projectsList.filter(p => p.id !== id) }));
     
     try {
-      await fetch(`${API_URL}/api/projects/${id}`, {
+      const res = await fetch(`${API_URL}/api/projects/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
