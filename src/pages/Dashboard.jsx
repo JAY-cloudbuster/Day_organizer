@@ -176,7 +176,7 @@ export const Dashboard = () => {
 
                 <div className="dash-grid">
                   {/* Create New Canvas */}
-                  <div className="dash-card dash-card--create liquid-glass" onClick={handleCreate}>
+                  <div className="dash-card dash-card--create liquid-glass card-glow animate-stagger" style={{ animationDelay: '0.1s' }} onClick={handleCreate}>
                     <div className="dash-card__create-icon">
                       <Plus size={32} />
                     </div>
@@ -190,10 +190,11 @@ export const Dashboard = () => {
                   ) : filteredProjects.length === 0 ? (
                     <div className="dash-empty" style={{ gridColumn: 'span 2' }}>No canvases found.</div>
                   ) : (
-                    filteredProjects.map((file) => (
+                    filteredProjects.map((file, idx) => (
                       <div
                         key={file.id}
-                        className="dash-card liquid-glass"
+                        className="dash-card liquid-glass animate-stagger"
+                        style={{ animationDelay: `${0.15 + idx * 0.07}s` }}
                         onClick={() => navigate(`/canvas/${file.id}`)}
                       >
                         <button
@@ -237,7 +238,7 @@ export const Dashboard = () => {
 
                 <div className="dash-grid">
                   {/* Create New Schedule */}
-                  <div className="dash-card dash-card--create dash-card--schedule liquid-glass" onClick={handleCreateSchedule}>
+                  <div className="dash-card dash-card--create dash-card--schedule liquid-glass card-glow animate-stagger" style={{ animationDelay: '0.1s' }} onClick={handleCreateSchedule}>
                     <div className="dash-card__create-icon dash-card__create-icon--schedule">
                       <Plus size={32} />
                     </div>
@@ -251,10 +252,11 @@ export const Dashboard = () => {
                   ) : filteredSchedules.length === 0 ? (
                     <div className="dash-empty" style={{ gridColumn: 'span 2' }}>No schedules yet. Create one!</div>
                   ) : (
-                    filteredSchedules.map((sched) => (
+                    filteredSchedules.map((sched, idx) => (
                       <div
                         key={sched.id}
-                        className="dash-card liquid-glass"
+                        className="dash-card liquid-glass animate-stagger"
+                        style={{ animationDelay: `${0.15 + idx * 0.07}s` }}
                         onClick={() => navigate(`/schedule/${sched.id}`)}
                       >
                         <button

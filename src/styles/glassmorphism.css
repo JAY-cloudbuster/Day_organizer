@@ -1,3 +1,7 @@
+/* ====================================================
+   GLASSMORPHISM — Premium Surface System
+   ==================================================== */
+
 .glass-panel {
   background: var(--glass-bg);
   backdrop-filter: blur(20px);
@@ -6,6 +10,13 @@
   box-shadow: var(--glass-shadow),
               inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
   border-radius: 16px;
+  transition: transform 0.35s var(--ease-smooth),
+              box-shadow 0.35s var(--ease-smooth),
+              border-color 0.35s var(--ease-smooth);
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .glass-pill {
@@ -16,6 +27,8 @@
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12),
               inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
   border-radius: 999px;
+  transition: transform 0.3s var(--ease-smooth),
+              box-shadow 0.3s var(--ease-smooth);
 }
 
 .card {
@@ -24,6 +37,98 @@
   box-shadow: var(--card-shadow),
               inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
   border-radius: 12px;
+  transition: transform 0.35s var(--ease-spring),
+              box-shadow 0.45s var(--ease-smooth),
+              border-color 0.35s var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
 }
 
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.12),
+              0 8px 16px rgba(0, 0, 0, 0.06),
+              inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+}
 
+/* Animated diagonal light sweep on hover */
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 60%,
+    transparent 100%
+  );
+  transition: left 0.7s var(--ease-in-out);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card:hover::after {
+  left: 120%;
+}
+
+/* Glow variant for premium CTA cards */
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.card-glow {
+  position: relative;
+}
+
+.card-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary) 0%,
+    var(--accent-secondary) 50%,
+    var(--accent-primary) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-smooth);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.card-glow:hover::before {
+  opacity: 1;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel,
+  .glass-pill,
+  .card {
+    transition: none;
+  }
+  .card::after {
+    display: none;
+  }
+  .card-glow::before {
+    animation: none;
+  }
+}

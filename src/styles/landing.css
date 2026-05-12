@@ -19,7 +19,7 @@
 
 .animate-blur-fade-up {
   opacity: 0;
-  animation: blurFadeUp 1s ease-out forwards;
+  animation: blurFadeUp 0.8s var(--ease-spring, ease-out) forwards;
 }
 
 /* ---------- Mobile menu link slide-in ---------- */
@@ -453,7 +453,9 @@
   padding: 0.625rem 1.5rem;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.25s var(--ease-smooth, ease),
+              transform 0.2s var(--ease-spring, ease),
+              box-shadow 0.25s var(--ease-smooth, ease);
   border: none;
   font-family: inherit;
 }
@@ -467,6 +469,8 @@
 
 .landing-btn-primary:hover {
   background: #e5e7eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
 }
 
 .landing-btn-secondary {
@@ -659,12 +663,15 @@
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   margin-top: 0.5rem;
-  transition: background 0.2s ease, transform 0.15s ease;
+  transition: background 0.25s var(--ease-smooth, ease),
+              transform 0.2s var(--ease-spring, ease),
+              box-shadow 0.25s var(--ease-smooth, ease);
 }
 
 .auth-submit:hover {
   background: #e5e7eb;
-  transform: scale(1.015);
+  transform: scale(1.015) translateY(-1px);
+  box-shadow: 0 6px 24px rgba(255, 255, 255, 0.1);
 }
 
 .auth-submit:active {
@@ -1143,13 +1150,16 @@
   flex-direction: column;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.35s var(--ease-spring, ease),
+              box-shadow 0.4s var(--ease-smooth, ease),
+              border-color 0.35s var(--ease-smooth, ease);
   position: relative;
 }
 
 .dash-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  transform: translateY(-6px);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45),
+              0 8px 20px rgba(0,0,0,0.2);
 }
 
 .dash-card__delete {
@@ -1248,7 +1258,14 @@
 
 .dash-card--create:hover .dash-card__create-icon {
   background: rgba(255,255,255,0.2);
-  transform: rotate(90deg);
+  transform: rotate(90deg) scale(1.05);
+}
+
+/* Premium glow on create card hover */
+.dash-card--create:hover {
+  border-color: rgba(255,255,255,0.2);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.45),
+              0 0 30px rgba(129, 140, 248, 0.08);
 }
 
 .dash-card__create-icon--schedule {
